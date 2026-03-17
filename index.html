@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Second Brain — Jürgen Oskamp</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0d0f12; --bg2:#161920; --bg3:#1e222c; --border:#2e3545;
+  --accent:#f0a500; --accent2:#ff7a30;
+  --text:#f0f2f8; --sub:#b0b8cc; --muted:#8090a8;
+  --urgent:#ff5555; --high:#f0a500; --normal:#5ba3e8;
+  --done-c:#6dd898; --snooze-c:#c090f0;
+  --font-mono:'IBM Plex Mono',monospace;
+  --font-sans:'IBM Plex Sans',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-sans);font-size:13px;min-height:100vh;}
+
+/* HEADER */
+.header{border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:52px;background:var(--bg);position:sticky;top:0;z-index:100;}
+.logo{font-family:var(--font-mono);font-size:13px;font-weight:600;color:var(--accent);letter-spacing:.05em;text-transform:uppercase;}
+.logo span{color:var(--sub);font-weight:400;}
+.header-right{display:flex;align-items:center;gap:12px;}
+.header-time{font-family:var(--font-mono);font-size:11px;color:var(--sub);}
+.btn-sm{background:none;border:1px solid var(--border);color:var(--sub);font-family:var(--font-mono);font-size:11px;padding:5px 14px;cursor:pointer;border-radius:3px;transition:all .15s;}
+.btn-sm:hover{border-color:var(--accent);color:var(--accent);}
+
+/* STATS */
+.stats-bar{display:flex;gap:1px;background:var(--border);border-bottom:1px solid var(--border);}
+.stat{flex:1;background:var(--bg2);padding:14px 20px;cursor:pointer;transition:background .15s;user-select:none;}
+.stat:hover{background:var(--bg3);}
+.stat-value{font-family:var(--font-mono);font-size:24px;font-weight:600;line-height:1;margin-bottom:5px;}
+.stat-label{font-size:12px;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;}
+.stat.urgent .stat-value{color:var(--urgent);}
+.stat.high   .stat-value{color:var(--high);}
+.stat.action .stat-value{color:var(--accent2);}
+.stat.open   .stat-value{color:var(--normal);}
+.stat.total  .stat-value{color:var(--text);}
+
+/* TABS */
+.tabs{display:flex;border-bottom:1px solid var(--border);background:var(--bg);padding:0 24px;}
+.tab{font-family:var(--font-mono);font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;padding:13px 18px;cursor:pointer;color:var(--sub);border-bottom:2px solid transparent;transition:all .15s;margin-bottom:-1px;}
+.tab:hover{color:var(--text);}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+/* MAIN */
+.main{padding:20px 24px;}
+.panel{display:none;}.panel.active{display:block;}
+
+/* FILTERS */
+.filters{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;align-items:center;}
+.filter-group{display:flex;align-items:center;gap:6px;}
+.filter-label{font-family:var(--font-mono);font-size:10px;color:var(--sub);text-transform:uppercase;letter-spacing:.1em;}
+.filter-btn{background:var(--bg2);border:1px solid var(--border);color:var(--sub);font-family:var(--font-mono);font-size:11px;padding:5px 12px;cursor:pointer;border-radius:3px;transition:all .15s;}
+.filter-btn:hover{border-color:var(--accent);color:var(--text);}
+.filter-btn.active{background:var(--accent);border-color:var(--accent);color:#000;font-weight:600;}
+.filter-sep{width:1px;height:20px;background:var(--border);margin:0 4px;}
+.search-input{background:var(--bg2);border:1px solid var(--border);color:var(--text);font-family:var(--font-mono);font-size:12px;padding:5px 12px;border-radius:3px;width:200px;margin-left:auto;transition:border-color .15s;}
+.search-input:focus{outline:none;border-color:var(--accent);}
+.search-input::placeholder{color:var(--muted);}
+
+/* TABLE */
+.items-table{width:100%;border-collapse:collapse;background:var(--bg2);border:1px solid var(--border);border-radius:4px;overflow:hidden;}
+.items-table th{background:var(--bg3);font-family:var(--font-mono);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--sub);padding:11px 14px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;}
+.items-table td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:top;}
+.items-table tr:last-child td{border-bottom:none;}
+.items-table tbody tr{cursor:pointer;}
+.items-table tbody tr:hover td{background:var(--bg3);}
+.item-title{font-weight:600;font-size:13px;color:var(--text);margin-bottom:4px;line-height:1.3;}
+.item-summary{font-size:12px;color:var(--sub);line-height:1.5;max-width:380px;}
+.item-action{margin-top:5px;font-size:11px;color:var(--accent2);font-weight:500;}
+.count-line{margin-top:10px;font-family:var(--font-mono);font-size:11px;color:var(--sub);}
+
+/* BADGES */
+.badge{display:inline-block;font-family:var(--font-mono);font-size:10px;font-weight:600;padding:3px 8px;border-radius:2px;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;}
+.badge-urgent {background:rgba(255,85,85,.18); color:#ff8888;border:1px solid rgba(255,85,85,.4);}
+.badge-high   {background:rgba(240,165,0,.18); color:#f5bc30;border:1px solid rgba(240,165,0,.4);}
+.badge-normal {background:rgba(91,163,232,.15);color:#7ab8f0;border:1px solid rgba(91,163,232,.35);}
+.badge-fyi    {background:rgba(128,144,168,.12);color:var(--sub);border:1px solid var(--border);}
+.badge-new    {background:rgba(91,163,232,.12);color:#7ab8f0;border:1px solid rgba(91,163,232,.25);}
+.badge-done   {background:rgba(60,180,100,.15);color:#6dd898;border:1px solid rgba(60,180,100,.35);}
+.badge-snoozed{background:rgba(160,100,220,.15);color:#c090f0;border:1px solid rgba(160,100,220,.35);}
+.badge-in-progress{background:rgba(240,165,0,.12);color:#f5bc30;border:1px solid rgba(240,165,0,.3);}
+.badge-email   {background:rgba(240,165,0,.08);color:var(--sub);border:1px solid var(--border);}
+.badge-telegram{background:rgba(91,163,232,.08);color:var(--sub);border:1px solid var(--border);}
+.badge-document{background:rgba(160,100,220,.08);color:var(--sub);border:1px solid var(--border);}
+
+/* RELEVANCE */
+.rel-bar{display:flex;align-items:center;gap:7px;}
+.rel-track{width:48px;height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+.rel-fill{height:100%;border-radius:2px;background:var(--accent);}
+.rel-num{font-family:var(--font-mono);font-size:11px;color:var(--sub);}
+
+/* ACTION BUTTONS */
+.actions{display:flex;gap:5px;flex-wrap:wrap;}
+.action-btn{background:none;border:1px solid var(--border);color:var(--sub);font-family:var(--font-mono);font-size:10px;padding:4px 9px;cursor:pointer;border-radius:2px;transition:all .15s;white-space:nowrap;}
+.action-btn:hover{border-color:var(--accent);color:var(--text);}
+.action-btn.done-btn:hover  {border-color:var(--done-c);color:var(--done-c);}
+.action-btn.snooze-btn:hover{border-color:var(--snooze-c);color:var(--snooze-c);}
+.action-btn.urgent-btn:hover{border-color:var(--urgent);color:var(--urgent);}
+.action-btn.normal-btn:hover{border-color:var(--normal);color:var(--normal);}
+.action-btn.delete-btn:hover{border-color:#ff5555;color:#ff5555;}
+.modal-btn.delete-btn:hover {border-color:#ff5555;color:#ff5555;}
+
+/* LOADING / EMPTY */
+.loading{text-align:center;padding:60px;font-family:var(--font-mono);font-size:12px;color:var(--sub);}
+.dot{display:inline-block;animation:blink 1.2s infinite;}
+.dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
+.empty{text-align:center;padding:60px;font-family:var(--font-mono);font-size:12px;color:var(--sub);}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:6px;width:100%;max-width:680px;max-height:90vh;overflow-y:auto;position:relative;}
+.modal-header{display:flex;align-items:flex-start;justify-content:space-between;padding:20px 24px 16px;border-bottom:1px solid var(--border);gap:16px;}
+.modal-title{font-weight:600;font-size:16px;color:var(--text);line-height:1.4;flex:1;}
+.modal-close{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:0;line-height:1;flex-shrink:0;transition:color .15s;}
+.modal-close:hover{color:var(--text);}
+.modal-body{padding:20px 24px;}
+.modal-badges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+.modal-section{margin-bottom:18px;}
+.modal-section-label{font-family:var(--font-mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;}
+.modal-section-value{font-size:13px;color:var(--sub);line-height:1.7;}
+.modal-section-value.highlight{color:var(--text);}
+.modal-actions{display:flex;gap:8px;flex-wrap:wrap;padding:16px 24px;border-top:1px solid var(--border);}
+.modal-btn{background:var(--bg3);border:1px solid var(--border);color:var(--sub);font-family:var(--font-mono);font-size:11px;padding:7px 14px;cursor:pointer;border-radius:3px;transition:all .15s;}
+.modal-btn:hover{border-color:var(--accent);color:var(--text);}
+.modal-btn.done-btn:hover  {border-color:var(--done-c);color:var(--done-c);}
+.modal-btn.snooze-btn:hover{border-color:var(--snooze-c);color:var(--snooze-c);}
+.modal-btn.urgent-btn:hover{border-color:var(--urgent);color:var(--urgent);}
+.modal-btn.normal-btn:hover{border-color:var(--normal);color:var(--normal);}
+.modal-btn.reopen-btn:hover{border-color:var(--normal);color:var(--normal);}
+.modal-btn.delete-btn:hover{border-color:var(--urgent);color:var(--urgent);}
+
+/* CARDS */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:18px;transition:border-color .15s;}
+.card:hover{border-color:var(--accent);}
+.card-name{font-weight:600;font-size:15px;color:var(--text);margin-bottom:6px;}
+.card-meta{font-size:12px;color:var(--sub);line-height:1.7;margin-bottom:10px;}
+.card-tags{display:flex;flex-wrap:wrap;gap:5px;}
+.card-notes{margin-top:10px;font-size:12px;color:var(--sub);line-height:1.6;}
+
+/* ASK */
+.ask-panel{max-width:760px;}
+.ask-label{font-family:var(--font-mono);font-size:10px;color:var(--sub);text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px;}
+.ask-webhook-row{display:flex;align-items:center;gap:8px;margin-bottom:14px;background:var(--bg2);border:1px solid var(--border);border-radius:3px;padding:10px 14px;}
+.ask-webhook-label{font-family:var(--font-mono);font-size:10px;color:var(--sub);text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;}
+.ask-webhook-input{flex:1;background:none;border:none;color:var(--accent);font-family:var(--font-mono);font-size:11px;outline:none;}
+.ask-webhook-input::placeholder{color:var(--muted);}
+.ask-input-row{display:flex;gap:8px;margin-bottom:14px;}
+.ask-input{flex:1;background:var(--bg2);border:1px solid var(--border);color:var(--text);font-family:var(--font-sans);font-size:13px;padding:11px 14px;border-radius:3px;transition:border-color .15s;}
+.ask-input:focus{outline:none;border-color:var(--accent);}
+.ask-input::placeholder{color:var(--muted);}
+.ask-btn{background:var(--accent);border:none;color:#000;font-family:var(--font-mono);font-size:12px;font-weight:600;padding:11px 22px;cursor:pointer;border-radius:3px;transition:background .15s;white-space:nowrap;}
+.ask-btn:hover{background:#ffbb25;}
+.ask-btn:disabled{background:var(--border);color:var(--muted);cursor:not-allowed;}
+.ask-suggestions{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:18px;}
+.ask-suggestion{background:var(--bg2);border:1px solid var(--border);color:var(--sub);font-size:12px;padding:6px 13px;border-radius:3px;cursor:pointer;transition:all .15s;}
+.ask-suggestion:hover{border-color:var(--accent);color:var(--text);}
+.ask-note{font-size:12px;color:var(--sub);line-height:1.6;background:var(--bg3);border:1px solid var(--border);border-left:3px solid var(--accent);padding:12px 16px;border-radius:3px;margin-bottom:14px;}
+.ask-note strong{color:var(--text);}
+.ask-response{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:20px;display:none;}
+.ask-response.visible{display:block;}
+.ask-response-label{font-family:var(--font-mono);font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;}
+.ask-response-text{font-size:13px;line-height:1.8;color:var(--text);white-space:pre-wrap;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--bg3);border:1px solid var(--border);border-left:3px solid var(--accent);padding:12px 18px;font-family:var(--font-mono);font-size:12px;color:var(--text);border-radius:3px;opacity:0;transform:translateY(10px);transition:all .2s;z-index:300;pointer-events:none;}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast.error{border-left-color:var(--urgent);}
+
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">Second Brain <span>/ Jürgen Oskamp</span></div>
+  <div class="header-right">
+    <div class="header-time" id="header-time"></div>
+    <button class="btn-sm" onclick="loadAll()">↻ Refresh</button>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stat urgent" onclick="quickFilter('priority','Urgent')">
+    <div class="stat-value" id="stat-urgent">—</div>
+    <div class="stat-label">Urgent</div>
+  </div>
+  <div class="stat high" onclick="quickFilter('priority','High')">
+    <div class="stat-value" id="stat-high">—</div>
+    <div class="stat-label">High priority</div>
+  </div>
+  <div class="stat action" onclick="quickFilter('action',true)">
+    <div class="stat-value" id="stat-action">—</div>
+    <div class="stat-label">Action required</div>
+  </div>
+  <div class="stat open" onclick="quickFilter('status','new')">
+    <div class="stat-value" id="stat-open">—</div>
+    <div class="stat-label">Open</div>
+  </div>
+  <div class="stat total" onclick="clearFilters()">
+    <div class="stat-value" id="stat-total">—</div>
+    <div class="stat-label">Total items</div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('items')">Items</div>
+  <div class="tab" onclick="switchTab('contacts')">Contacts</div>
+  <div class="tab" onclick="switchTab('projects')">Projects</div>
+  <div class="tab" onclick="switchTab('ask')">Ask</div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- ITEMS -->
+  <div class="panel active" id="panel-items">
+    <div class="filters">
+      <div class="filter-group">
+        <span class="filter-label">Status</span>
+        <button class="filter-btn active" id="sf-all"     onclick="setFilter('status','all',this)">All</button>
+        <button class="filter-btn"        id="sf-new"     onclick="setFilter('status','new',this)">New</button>
+        <button class="filter-btn"        id="sf-done"    onclick="setFilter('status','done',this)">Done</button>
+        <button class="filter-btn"        id="sf-snoozed" onclick="setFilter('status','snoozed',this)">Snoozed</button>
+      </div>
+      <div class="filter-sep"></div>
+      <div class="filter-group">
+        <span class="filter-label">Priority</span>
+        <button class="filter-btn active" id="pf-all"    onclick="setFilter('priority','all',this)">All</button>
+        <button class="filter-btn"        id="pf-urgent" onclick="setFilter('priority','Urgent',this)">Urgent</button>
+        <button class="filter-btn"        id="pf-high"   onclick="setFilter('priority','High',this)">High</button>
+        <button class="filter-btn"        id="pf-normal" onclick="setFilter('priority','Normal',this)">Normal</button>
+      </div>
+      <div class="filter-sep"></div>
+      <div class="filter-group">
+        <span class="filter-label">Source</span>
+        <button class="filter-btn active" id="src-all"      onclick="setFilter('source','all',this)">All</button>
+        <button class="filter-btn"        id="src-email"    onclick="setFilter('source','email',this)">Email</button>
+        <button class="filter-btn"        id="src-telegram" onclick="setFilter('source','telegram',this)">Telegram</button>
+      </div>
+      <input type="text" class="search-input" id="search-input" placeholder="Search..." oninput="setSearch(this.value)">
+    </div>
+    <div id="items-container"><div class="loading">Loading<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div></div>
+  </div>
+
+  <!-- CONTACTS -->
+  <div class="panel" id="panel-contacts">
+    <div id="contacts-container"><div class="loading">Loading<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div></div>
+  </div>
+
+  <!-- PROJECTS -->
+  <div class="panel" id="panel-projects">
+    <div id="projects-container"><div class="loading">Loading<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div></div>
+  </div>
+
+  <!-- ASK -->
+  <div class="panel" id="panel-ask">
+    <div class="ask-panel">
+      <div class="ask-label">Ask your Second Brain</div>
+      <div class="ask-note">
+        <strong>Webhook URL required.</strong> Paste your Make webhook URL below — it is saved per device in your browser. See the setup instructions above this dashboard for how to create it in Make.
+      </div>
+      <div class="ask-webhook-row">
+        <span class="ask-webhook-label">Webhook URL</span>
+        <input type="text" class="ask-webhook-input" id="webhook-url" placeholder="https://hook.eu2.make.com/..." oninput="saveWebhook(this.value)">
+      </div>
+      <div class="ask-input-row">
+        <input type="text" class="ask-input" id="ask-input" placeholder="e.g. What are my open commitments for Little Nirvana?" onkeydown="if(event.key==='Enter')askBrain()">
+        <button class="ask-btn" id="ask-btn" onclick="askBrain()">Ask →</button>
+      </div>
+      <div class="ask-suggestions">
+        <div class="ask-suggestion" onclick="askQuick('What are my urgent items this week?')">Urgent this week</div>
+        <div class="ask-suggestion" onclick="askQuick('What are my open action items?')">Open actions</div>
+        <div class="ask-suggestion" onclick="askQuick('What is the status of the IraSME project?')">IraSME status</div>
+        <div class="ask-suggestion" onclick="askQuick('What do I need to follow up with Barbara about?')">Follow-ups Barbara</div>
+        <div class="ask-suggestion" onclick="askQuick('What are my high priority emails?')">High priority emails</div>
+        <div class="ask-suggestion" onclick="askQuick('Summarise everything that happened this week.')">This week summary</div>
+      </div>
+      <div class="ask-response" id="ask-response">
+        <div class="ask-response-label">Second Brain</div>
+        <div class="ask-response-text" id="ask-response-text"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ITEM MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOnOverlay(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title"></div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-badges" id="modal-badges"></div>
+      <div id="modal-fields"></div>
+    </div>
+    <div class="modal-actions" id="modal-actions"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const SB_URL = 'https://lnupagxyhlbnhivsrvlg.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxudXBhZ3h5aGxibmhpdnNydmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNzI0NjIsImV4cCI6MjA4ODc0ODQ2Mn0.3BkUalPRqw5i4_igl1mNtX2ID4_zZk67wNMmFnPp8mQ';
+
+let allItems = [];
+let filters  = { status:'all', priority:'all', source:'all', search:'', actionOnly:false };
+let currentModalId = null;
+
+// ── SUPABASE ──────────────────────────────────────────────────────────
+async function sbGet(path) {
+  const r = await fetch(`${SB_URL}/rest/v1/${path}`, {
+    headers:{ apikey:SB_KEY, Authorization:`Bearer ${SB_KEY}` }
+  });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+async function sbPatch(path, body) {
+  const r = await fetch(`${SB_URL}/rest/v1/${path}`, {
+    method:'PATCH',
+    headers:{ apikey:SB_KEY, Authorization:`Bearer ${SB_KEY}`, 'Content-Type':'application/json', Prefer:'return=minimal' },
+    body:JSON.stringify(body)
+  });
+  if (!r.ok) throw new Error(await r.text());
+}
+async function sbSoftDelete(id) {
+  await sbPatch(`items?id=eq.${id}`, { deleted: true });
+}
+
+// ── CLOCK ─────────────────────────────────────────────────────────────
+function updateClock() {
+  const n = new Date();
+  document.getElementById('header-time').textContent =
+    n.toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short'}) + ' ' +
+    n.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────
+function toast(msg, err=false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show'+(err?' error':'');
+  setTimeout(()=>el.className='toast', 2600);
+}
+
+// ── LOAD ──────────────────────────────────────────────────────────────
+async function loadAll() {
+  await Promise.all([loadItems(), loadContacts(), loadProjects()]);
+}
+
+// ── ITEMS ─────────────────────────────────────────────────────────────
+async function loadItems() {
+  try {
+    allItems = await sbGet('items?select=*&deleted=eq.false&order=created_at.desc&limit=300');
+    updateStats();
+    renderItems();
+  } catch(e) {
+    document.getElementById('items-container').innerHTML = `<div class="empty">Error loading items: ${x(e.message)}</div>`;
+  }
+}
+
+function updateStats() {
+  const active = allItems.filter(i => !i.status || i.status === 'new' || i.status === 'in-progress');
+  document.getElementById('stat-total').textContent  = allItems.length;
+  document.getElementById('stat-urgent').textContent = active.filter(i=>i.priority==='Urgent').length;
+  document.getElementById('stat-high').textContent   = active.filter(i=>i.priority==='High').length;
+  document.getElementById('stat-action').textContent = active.filter(i=>i.action_required===true).length;
+  document.getElementById('stat-open').textContent   = active.length;
+}
+
+function applyFilters(items) {
+  return items.filter(i => {
+    const s = i.status||'new';
+    if (filters.status !== 'all' && s !== filters.status) return false;
+    if (filters.priority !== 'all' && i.priority !== filters.priority) return false;
+    if (filters.source !== 'all' && i.source !== filters.source) return false;
+    if (filters.actionOnly && !i.action_required) return false;
+    if (filters.search) {
+      const q = filters.search.toLowerCase();
+      if (!(i.title||'').toLowerCase().includes(q) && !(i.summary||'').toLowerCase().includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function renderItems() {
+  const list = applyFilters(allItems);
+  const el   = document.getElementById('items-container');
+  if (!list.length) { el.innerHTML='<div class="empty">No items match current filters.</div>'; return; }
+
+  const rows = list.map(i => {
+    const pri = i.priority||'Normal';
+    const sta = i.status||'new';
+    const src = i.source||'';
+    const rel = i.relevance_score||0;
+    const dt  = i.created_at ? new Date(i.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}) : '';
+
+    const btns = buildActionBtns(i, false);
+
+    return `<tr onclick="openModal('${i.id}')" title="Click to view details">
+      <td>
+        <div class="item-title">${x(i.title||'—')}</div>
+        <div class="item-summary">${x(i.summary||'')}</div>
+        ${i.action_required?`<div class="item-action">▶ ${x(i.action_description||'Action required')}</div>`:''}
+      </td>
+      <td><span class="badge badge-${pri.toLowerCase()}">${pri}</span></td>
+      <td><span class="badge badge-${sta}">${sta}</span></td>
+      <td><span class="badge badge-${src}">${src||'—'}</span></td>
+      <td><div class="rel-bar"><div class="rel-track"><div class="rel-fill" style="width:${rel*10}%"></div></div><span class="rel-num">${rel}/10</span></div></td>
+      <td style="font-family:var(--font-mono);font-size:11px;color:var(--sub);white-space:nowrap">${dt}</td>
+      <td onclick="event.stopPropagation()"><div class="actions">${btns}</div></td>
+    </tr>`;
+  }).join('');
+
+  el.innerHTML = `<table class="items-table">
+    <thead><tr>
+      <th>Title / Summary</th><th>Priority</th><th>Status</th>
+      <th>Source</th><th>Relevance</th><th>Date</th><th>Actions</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <div class="count-line">Showing ${list.length} of ${allItems.length} items — click any row for details</div>`;
+}
+
+function buildActionBtns(item, isModal) {
+  const cls = isModal ? 'modal-btn' : 'action-btn';
+  const fn  = isModal ? 'modalAct' : 'act';
+  const sta = item.status||'new';
+  const pri = item.priority||'Normal';
+  const id  = item.id;
+  let btns  = '';
+
+  if (sta !== 'done')    btns += `<button class="${cls} done-btn"   onclick="${fn}('${id}','done')">✓ Done</button>`;
+  if (sta === 'done')    btns += `<button class="${cls} reopen-btn" onclick="${fn}('${id}','reopen')">↩ Reopen</button>`;
+  if (sta !== 'snoozed' && sta !== 'done') btns += `<button class="${cls} snooze-btn" onclick="${fn}('${id}','snooze')">💤 Snooze</button>`;
+  if (pri !== 'Urgent')  btns += `<button class="${cls} urgent-btn" onclick="${fn}('${id}','urgent')">🚨 Urgent</button>`;
+  if (pri !== 'Normal')  btns += `<button class="${cls} normal-btn" onclick="${fn}('${id}','normal')">↓ Normal</button>`;
+  if (pri !== 'High' && pri !== 'Urgent') btns += `<button class="${cls}" onclick="${fn}('${id}','high')">↑ High</button>`;
+  btns += `<button class="${cls} delete-btn" onclick="${fn}('${id}','delete')">🗑 Delete</button>`;
+
+  return btns;
+}
+
+async function act(id, action) {
+  if (action === 'delete') {
+    if (!confirm('Delete this item? It will be hidden from the dashboard.')) return;
+    try {
+      await sbSoftDelete(id);
+      allItems = allItems.filter(i => i.id !== id);
+      updateStats();
+      renderItems();
+      toast('🗑 Item deleted');
+    } catch(e) { toast('Error: '+e.message, true); }
+    return;
+  }
+  try {
+    const updates = actionToUpdates(action);
+    await sbPatch(`items?id=eq.${id}`, updates);
+    const item = allItems.find(i=>i.id===id);
+    if (item) Object.assign(item, updates);
+    updateStats();
+    renderItems();
+    toast(actionToast(action));
+  } catch(e) { toast('Error: '+e.message, true); }
+}
+
+async function modalAct(id, action) {
+  if (action === 'delete') {
+    if (!confirm('Delete this item? It will be hidden from the dashboard.')) return;
+    try {
+      await sbSoftDelete(id);
+      allItems = allItems.filter(i => i.id !== id);
+      updateStats();
+      renderItems();
+      closeModal();
+      toast('🗑 Item deleted');
+    } catch(e) { toast('Error: '+e.message, true); }
+    return;
+  }
+  try {
+    const updates = actionToUpdates(action);
+    await sbPatch(`items?id=eq.${id}`, updates);
+    const item = allItems.find(i=>i.id===id);
+    if (item) Object.assign(item, updates);
+    updateStats();
+    renderItems();
+    openModal(id); // refresh modal
+    toast(actionToast(action));
+  } catch(e) { toast('Error: '+e.message, true); }
+}
+
+function actionToUpdates(action) {
+  const map = {
+    done:   { status:'done',    completed:true  },
+    reopen: { status:'new',     completed:false },
+    snooze: { status:'snoozed' },
+    urgent: { priority:'Urgent' },
+    high:   { priority:'High' },
+    normal: { priority:'Normal' },
+  };
+  return map[action] || {};
+}
+
+function actionToast(action) {
+  const map = { done:'✓ Marked as done', reopen:'↩ Reopened', snooze:'💤 Snoozed', urgent:'🚨 Marked urgent', high:'↑ Set to High', normal:'↓ Set to Normal' };
+  return map[action] || 'Updated';
+}
+
+// ── MODAL ─────────────────────────────────────────────────────────────
+function openModal(id) {
+  const item = allItems.find(i=>i.id===id);
+  if (!item) return;
+  currentModalId = id;
+
+  const pri = item.priority||'Normal';
+  const sta = item.status||'new';
+  const src = item.source||'';
+
+  document.getElementById('modal-title').textContent = item.title||'—';
+
+  document.getElementById('modal-badges').innerHTML =
+    `<span class="badge badge-${pri.toLowerCase()}">${pri}</span>` +
+    `<span class="badge badge-${sta}">${sta}</span>` +
+    `<span class="badge badge-${src}">${src||'—'}</span>` +
+    (item.action_required ? `<span class="badge" style="background:rgba(255,122,48,.15);color:#ff9a60;border:1px solid rgba(255,122,48,.3)">Action required</span>` : '');
+
+  const fields = [];
+
+  if (item.summary)
+    fields.push(field('Summary', item.summary, true));
+  if (item.action_required && item.action_description)
+    fields.push(field('Action', item.action_description, true));
+  if (item.raw_content)
+    fields.push(field('Original content', item.raw_content));
+  if (item.relevance_reason)
+    fields.push(field('Why relevant', item.relevance_reason));
+  if (item.due_date)
+    fields.push(field('Due date', item.due_date));
+  if (item.people && item.people.length)
+    fields.push(field('People', Array.isArray(item.people) ? item.people.join(', ') : item.people));
+  if (item.sender_name || item.sender_email)
+    fields.push(field('Sender', [item.sender_name, item.sender_email].filter(Boolean).join(' — ')));
+  if (item.created_at)
+    fields.push(field('Received', new Date(item.created_at).toLocaleString('en-GB')));
+
+  document.getElementById('modal-fields').innerHTML = fields.join('');
+  document.getElementById('modal-actions').innerHTML = buildActionBtns(item, true);
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function field(label, value, highlight=false) {
+  return `<div class="modal-section">
+    <div class="modal-section-label">${x(label)}</div>
+    <div class="modal-section-value${highlight?' highlight':''}">${x(String(value||''))}</div>
+  </div>`;
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  currentModalId = null;
+}
+
+function closeModalOnOverlay(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+}
+
+document.addEventListener('keydown', e => { if (e.key==='Escape') closeModal(); });
+
+// ── FILTER SETTERS ────────────────────────────────────────────────────
+const filterGroups = {
+  status:   ['sf-all','sf-new','sf-done','sf-snoozed'],
+  priority: ['pf-all','pf-urgent','pf-high','pf-normal'],
+  source:   ['src-all','src-email','src-telegram'],
+};
+
+function setFilter(type, val, btn) {
+  filters[type] = val;
+  filters.actionOnly = false;
+  filterGroups[type].forEach(id => document.getElementById(id)?.classList.remove('active'));
+  btn.classList.add('active');
+  switchTab('items');
+  renderItems();
+}
+
+function setSearch(val) { filters.search=val; renderItems(); }
+
+function quickFilter(type, val) {
+  filters.actionOnly = false;
+  if (type === 'action') {
+    // reset others, set action only
+    filters = { status:'new', priority:'all', source:'all', search:'', actionOnly:true };
+    // reset all filter button visuals
+    Object.values(filterGroups).flat().forEach(id => document.getElementById(id)?.classList.remove('active'));
+    document.getElementById('sf-new')?.classList.add('active');
+    document.getElementById('pf-all')?.classList.add('active');
+    document.getElementById('src-all')?.classList.add('active');
+  } else if (type === 'priority') {
+    filters.priority = val;
+    filterGroups.priority.forEach(id=>document.getElementById(id)?.classList.remove('active'));
+    document.getElementById('pf-'+val.toLowerCase())?.classList.add('active');
+  } else if (type === 'status') {
+    filters.status = val;
+    filterGroups.status.forEach(id=>document.getElementById(id)?.classList.remove('active'));
+    document.getElementById('sf-'+val)?.classList.add('active');
+  }
+  switchTab('items');
+  renderItems();
+}
+
+function clearFilters() {
+  filters = { status:'all', priority:'all', source:'all', search:'', actionOnly:false };
+  document.getElementById('search-input').value = '';
+  Object.values(filterGroups).flat().forEach(id=>document.getElementById(id)?.classList.remove('active'));
+  document.getElementById('sf-all')?.classList.add('active');
+  document.getElementById('pf-all')?.classList.add('active');
+  document.getElementById('src-all')?.classList.add('active');
+  switchTab('items');
+  renderItems();
+}
+
+// ── CONTACTS ──────────────────────────────────────────────────────────
+async function loadContacts() {
+  try {
+    const data = await sbGet('contacts?select=*&order=full_name.asc');
+    const el = document.getElementById('contacts-container');
+    if (!data || !data.length) { el.innerHTML='<div class="empty">No contacts yet.</div>'; return; }
+
+    el.innerHTML = `<div class="cards-grid">${data.map(c => {
+      const imp = c.importance ? String(c.importance) : '';
+      const lastContact = c.last_contact_at ? new Date(c.last_contact_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : null;
+      return `<div class="card">
+        <div class="card-name">${x(c.full_name||'—')}</div>
+        <div class="card-meta">
+          ${c.company    ? x(c.company)+'<br>' : ''}
+          ${c.role_title ? x(c.role_title)+'<br>' : ''}
+          ${c.relationship_type ? x(c.relationship_type)+'<br>' : ''}
+          ${c.email_address ? `<span style="color:var(--accent)">${x(c.email_address)}</span><br>` : ''}
+          ${lastContact ? `<span style="color:var(--muted)">Last contact: ${lastContact}</span>` : ''}
+        </div>
+        ${imp ? `<div class="card-tags"><span class="badge badge-${imp.toLowerCase()}">${x(imp)}</span></div>` : ''}
+        ${c.notes ? `<div class="card-notes">${x(c.notes)}</div>` : ''}
+      </div>`;
+    }).join('')}</div>`;
+  } catch(e) {
+    document.getElementById('contacts-container').innerHTML = `<div class="empty">Error loading contacts: ${x(e.message)}</div>`;
+  }
+}
+
+// ── PROJECTS ──────────────────────────────────────────────────────────
+async function loadProjects() {
+  try {
+    const data = await sbGet('projects?select=*&order=name.asc');
+    const el = document.getElementById('projects-container');
+    if (!data || !data.length) { el.innerHTML='<div class="empty">No projects yet.</div>'; return; }
+
+    el.innerHTML = `<div class="cards-grid">${data.map(p => {
+      const pri = p.priority ? String(p.priority) : '';
+      return `<div class="card">
+        <div class="card-name">${x(p.name||'—')}</div>
+        <div class="card-meta">
+          ${p.client   ? 'Client: '+x(p.client)+'<br>' : ''}
+          ${p.deadline ? 'Deadline: <span style="color:var(--accent)">'+x(p.deadline)+'</span><br>' : ''}
+          ${p.status   ? 'Status: '+x(p.status) : ''}
+        </div>
+        ${pri ? `<div class="card-tags"><span class="badge badge-${pri.toLowerCase()}">${x(pri)}</span></div>` : ''}
+        ${p.notes ? `<div class="card-notes">${x(p.notes)}</div>` : ''}
+      </div>`;
+    }).join('')}</div>`;
+  } catch(e) {
+    document.getElementById('projects-container').innerHTML = `<div class="empty">Error loading projects: ${x(e.message)}</div>`;
+  }
+}
+
+// ── ASK ───────────────────────────────────────────────────────────────
+function saveWebhook(v) { try { localStorage.setItem('sb_wh',v); } catch(e){} }
+function loadWebhook()  { try { const v=localStorage.getItem('sb_wh'); if(v) document.getElementById('webhook-url').value=v; } catch(e){} }
+
+function askQuick(q) { document.getElementById('ask-input').value=q; askBrain(); }
+
+async function askBrain() {
+  const question = document.getElementById('ask-input').value.trim();
+  const webhook  = document.getElementById('webhook-url').value.trim();
+  if (!question) return;
+  if (!webhook) { toast('Paste your Make webhook URL first', true); return; }
+
+  const btn  = document.getElementById('ask-btn');
+  const resp = document.getElementById('ask-response');
+  const txt  = document.getElementById('ask-response-text');
+  btn.disabled=true; btn.textContent='Thinking...';
+  resp.classList.add('visible'); txt.textContent='...';
+
+  try {
+    const r = await fetch(webhook, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ question })
+    });
+    txt.textContent = (await r.text()) || '(empty response)';
+  } catch(e) {
+    txt.textContent = 'Error reaching webhook: '+e.message;
+  } finally {
+    btn.disabled=false; btn.textContent='Ask →';
+  }
+}
+
+// ── TABS ──────────────────────────────────────────────────────────────
+function switchTab(name) {
+  const names = ['items','contacts','projects','ask'];
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',names[i]===name));
+  names.forEach(n=>document.getElementById(`panel-${n}`)?.classList.toggle('active',n===name));
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────
+function x(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────
+updateClock();
+setInterval(updateClock, 30000);
+loadWebhook();
+loadAll();
+</script>
+</body>
+</html>
