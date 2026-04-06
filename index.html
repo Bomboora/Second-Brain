@@ -1,4 +1,4 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -783,7 +783,7 @@
 <script>
   const CONFIG = {
     supabaseUrl: 'https://lnupagxyhlbnhivsrvlg.supabase.co',
-    supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxudXBhZ3h5aGxibmhpdnNydmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNzI0NjIsImV4cCI6MjA4ODc0ODQ2Mn0.3BkUalPRqw5i4_igl1mNtX2ID4_zZk67wNMmFnPp8mQ',
+    supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxudXBhZ3h5aGxibmhpdnNydmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNzI0NjIsImV4cCI6MjA4ODc0ODQ2Mn0.3BkUalPRqw5i4_igl1mNtX2ID4_zZk67wNMmFnPp8mQ', // ← Vervang dit
     askWebhook: 'https://hook.eu2.make.com/3vjh4j3pfuab2a2p3vfvr2bwftv7hcik', // ← Vervang dit (optioneel)
   };
 </script>
@@ -1010,11 +1010,12 @@ async function supabase(path, opts = {}) {
 
 // ─── INIT ────────────────────────────────────────────────
 async function loadAll() {
-  if (CONFIG.supabaseKey === 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxudXBhZ3h5aGxibmhpdnNydmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNzI0NjIsImV4cCI6MjA4ODc0ODQ2Mn0.3BkUalPRqw5i4_igl1mNtX2ID4_zZk67wNMmFnPp8mQ') {
+  if (!CONFIG.supabaseKey || CONFIG.supabaseKey.startsWith('YOUR_')) {
     document.getElementById('configNotice').style.display = 'block';
     loadMockData();
     return;
   }
+  document.getElementById('configNotice').style.display = 'none';
   await Promise.all([loadItems(), loadContacts(), loadProjects()]);
 }
 
@@ -1247,11 +1248,18 @@ async function sendAsk() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ question: q })
     });
-    const data = await response.json();
-    const answer = data.answer || data.response || data.text || JSON.stringify(data);
+    const text = await response.text();
+    // Try JSON first, fall back to plain text
+    let answer;
+    try {
+      const data = JSON.parse(text);
+      answer = data.answer || data.response || data.text || text;
+    } catch {
+      answer = text;
+    }
     res.innerHTML = answer.replace(/\n/g, '<br>');
   } catch(e) {
-    res.innerHTML = `<span style="color:var(--accent-red)">Error: ${e.message}. Make sure your Ask webhook is configured.</span>`;
+    res.innerHTML = `<span style="color:var(--accent-red)">Error: ${e.message}</span>`;
   }
   btn.disabled = false;
 }
