@@ -1,740 +1,1337 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Second Brain — Jürgen Oskamp</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>Second Brain</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg:#0d0f12; --bg2:#161920; --bg3:#1e222c; --border:#2e3545;
-  --accent:#f0a500; --accent2:#ff7a30;
-  --text:#f0f2f8; --sub:#b0b8cc; --muted:#8090a8;
-  --urgent:#ff5555; --high:#f0a500; --normal:#5ba3e8;
-  --done-c:#6dd898; --snooze-c:#c090f0;
-  --font-mono:'IBM Plex Mono',monospace;
-  --font-sans:'IBM Plex Sans',sans-serif;
-}
-*{margin:0;padding:0;box-sizing:border-box;}
-body{background:var(--bg);color:var(--text);font-family:var(--font-sans);font-size:13px;min-height:100vh;}
+  :root {
+    --bg: #0a0d14;
+    --surface: #111520;
+    --card: #151b27;
+    --card-hover: #1a2233;
+    --border: rgba(255,255,255,0.07);
+    --border-active: rgba(255,255,255,0.15);
+    --text: #e8ecf4;
+    --muted: #5a6478;
+    --subtle: #3a4255;
+    --accent-orange: #f5a623;
+    --accent-blue: #4b9eff;
+    --accent-red: #ff4d4d;
+    --accent-green: #3dd68c;
+    --accent-purple: #a78bfa;
+    --urgent: #ff4d4d;
+    --high: #f5a623;
+    --medium: #4b9eff;
+    --low: #3dd68c;
+  }
 
-/* HEADER */
-.header{border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:52px;background:var(--bg);position:sticky;top:0;z-index:100;}
-.logo{font-family:var(--font-mono);font-size:13px;font-weight:600;color:var(--accent);letter-spacing:.05em;text-transform:uppercase;}
-.logo span{color:var(--sub);font-weight:400;}
-.header-right{display:flex;align-items:center;gap:12px;}
-.header-time{font-family:var(--font-mono);font-size:11px;color:var(--sub);}
-.btn-sm{background:none;border:1px solid var(--border);color:var(--sub);font-family:var(--font-mono);font-size:11px;padding:5px 14px;cursor:pointer;border-radius:3px;transition:all .15s;}
-.btn-sm:hover{border-color:var(--accent);color:var(--accent);}
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-/* STATS */
-.stats-bar{display:flex;gap:1px;background:var(--border);border-bottom:1px solid var(--border);}
-.stat{flex:1;background:var(--bg2);padding:14px 20px;cursor:pointer;transition:background .15s;user-select:none;}
-.stat:hover{background:var(--bg3);}
-.stat-value{font-family:var(--font-mono);font-size:24px;font-weight:600;line-height:1;margin-bottom:5px;}
-.stat-label{font-size:12px;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;}
-.stat.urgent .stat-value{color:var(--urgent);}
-.stat.high   .stat-value{color:var(--high);}
-.stat.action .stat-value{color:var(--accent2);}
-.stat.open   .stat-value{color:var(--normal);}
-.stat.total  .stat-value{color:var(--text);}
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
 
-/* TABS */
-.tabs{display:flex;border-bottom:1px solid var(--border);background:var(--bg);padding:0 24px;}
-.tab{font-family:var(--font-mono);font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;padding:13px 18px;cursor:pointer;color:var(--sub);border-bottom:2px solid transparent;transition:all .15s;margin-bottom:-1px;}
-.tab:hover{color:var(--text);}
-.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+  /* Background texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse 80% 50% at 20% 10%, rgba(75,158,255,0.04) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(167,139,250,0.03) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
 
-/* MAIN */
-.main{padding:20px 24px;}
-.panel{display:none;}.panel.active{display:block;}
+  /* ─── LAYOUT ─── */
+  .app { display: flex; min-height: 100vh; position: relative; z-index: 1; }
 
-/* FILTERS */
-.filters{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;align-items:center;}
-.filter-group{display:flex;align-items:center;gap:6px;}
-.filter-label{font-family:var(--font-mono);font-size:10px;color:var(--sub);text-transform:uppercase;letter-spacing:.1em;}
-.filter-btn{background:var(--bg2);border:1px solid var(--border);color:var(--sub);font-family:var(--font-mono);font-size:11px;padding:5px 12px;cursor:pointer;border-radius:3px;transition:all .15s;}
-.filter-btn:hover{border-color:var(--accent);color:var(--text);}
-.filter-btn.active{background:var(--accent);border-color:var(--accent);color:#000;font-weight:600;}
-.filter-sep{width:1px;height:20px;background:var(--border);margin:0 4px;}
-.search-input{background:var(--bg2);border:1px solid var(--border);color:var(--text);font-family:var(--font-mono);font-size:12px;padding:5px 12px;border-radius:3px;width:200px;margin-left:auto;transition:border-color .15s;}
-.search-input:focus{outline:none;border-color:var(--accent);}
-.search-input::placeholder{color:var(--muted);}
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    width: 220px;
+    min-height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 28px 0;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 100;
+  }
 
-/* TABLE */
-.items-table{width:100%;border-collapse:collapse;background:var(--bg2);border:1px solid var(--border);border-radius:4px;overflow:hidden;}
-.items-table th{background:var(--bg3);font-family:var(--font-mono);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--sub);padding:11px 14px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;}
-.items-table td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:top;}
-.items-table tr:last-child td{border-bottom:none;}
-.items-table tbody tr{cursor:pointer;}
-.items-table tbody tr:hover td{background:var(--bg3);}
-.item-title{font-weight:600;font-size:13px;color:var(--text);margin-bottom:4px;line-height:1.3;}
-.item-summary{font-size:12px;color:var(--sub);line-height:1.5;max-width:380px;}
-.item-action{margin-top:5px;font-size:11px;color:var(--accent2);font-weight:500;}
-.count-line{margin-top:10px;font-family:var(--font-mono);font-size:11px;color:var(--sub);}
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+    color: var(--text);
+    padding: 0 24px 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
 
-/* BADGES */
-.badge{display:inline-block;font-family:var(--font-mono);font-size:10px;font-weight:600;padding:3px 8px;border-radius:2px;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;}
-.badge-urgent {background:rgba(255,85,85,.18); color:#ff8888;border:1px solid rgba(255,85,85,.4);}
-.badge-high   {background:rgba(240,165,0,.18); color:#f5bc30;border:1px solid rgba(240,165,0,.4);}
-.badge-normal {background:rgba(91,163,232,.15);color:#7ab8f0;border:1px solid rgba(91,163,232,.35);}
-.badge-fyi    {background:rgba(128,144,168,.12);color:var(--sub);border:1px solid var(--border);}
-.badge-new    {background:rgba(91,163,232,.12);color:#7ab8f0;border:1px solid rgba(91,163,232,.25);}
-.badge-done   {background:rgba(60,180,100,.15);color:#6dd898;border:1px solid rgba(60,180,100,.35);}
-.badge-snoozed{background:rgba(160,100,220,.15);color:#c090f0;border:1px solid rgba(160,100,220,.35);}
-.badge-in-progress{background:rgba(240,165,0,.12);color:#f5bc30;border:1px solid rgba(240,165,0,.3);}
-.badge-email   {background:rgba(240,165,0,.08);color:var(--sub);border:1px solid var(--border);}
-.badge-telegram{background:rgba(91,163,232,.08);color:var(--sub);border:1px solid var(--border);}
-.badge-document{background:rgba(160,100,220,.08);color:var(--sub);border:1px solid var(--border);}
+  .logo-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent-orange);
+    box-shadow: 0 0 10px var(--accent-orange);
+  }
 
-/* RELEVANCE */
-.rel-bar{display:flex;align-items:center;gap:7px;}
-.rel-track{width:48px;height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
-.rel-fill{height:100%;border-radius:2px;background:var(--accent);}
-.rel-num{font-family:var(--font-mono);font-size:11px;color:var(--sub);}
+  .nav { padding: 20px 0; flex: 1; }
 
-/* ACTION BUTTONS */
-.actions{display:flex;gap:5px;flex-wrap:wrap;}
-.action-btn{background:none;border:1px solid var(--border);color:var(--sub);font-family:var(--font-mono);font-size:10px;padding:4px 9px;cursor:pointer;border-radius:2px;transition:all .15s;white-space:nowrap;}
-.action-btn:hover{border-color:var(--accent);color:var(--text);}
-.action-btn.done-btn:hover  {border-color:var(--done-c);color:var(--done-c);}
-.action-btn.snooze-btn:hover{border-color:var(--snooze-c);color:var(--snooze-c);}
-.action-btn.urgent-btn:hover{border-color:var(--urgent);color:var(--urgent);}
-.action-btn.normal-btn:hover{border-color:var(--normal);color:var(--normal);}
-.action-btn.delete-btn:hover{border-color:#ff5555;color:#ff5555;}
-.modal-btn.delete-btn:hover {border-color:#ff5555;color:#ff5555;}
+  .nav-section {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 16px 24px 8px;
+  }
 
-/* LOADING / EMPTY */
-.loading{text-align:center;padding:60px;font-family:var(--font-mono);font-size:12px;color:var(--sub);}
-.dot{display:inline-block;animation:blink 1.2s infinite;}
-.dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
-@keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
-.empty{text-align:center;padding:60px;font-family:var(--font-mono);font-size:12px;color:var(--sub);}
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 24px;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 400;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+    margin: 1px 0;
+  }
 
-/* MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;}
-.modal-overlay.open{display:flex;}
-.modal{background:var(--bg2);border:1px solid var(--border);border-radius:6px;width:100%;max-width:680px;max-height:90vh;overflow-y:auto;position:relative;}
-.modal-header{display:flex;align-items:flex-start;justify-content:space-between;padding:20px 24px 16px;border-bottom:1px solid var(--border);gap:16px;}
-.modal-title{font-weight:600;font-size:16px;color:var(--text);line-height:1.4;flex:1;}
-.modal-close{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:0;line-height:1;flex-shrink:0;transition:color .15s;}
-.modal-close:hover{color:var(--text);}
-.modal-body{padding:20px 24px;}
-.modal-badges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
-.modal-section{margin-bottom:18px;}
-.modal-section-label{font-family:var(--font-mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;}
-.modal-section-value{font-size:13px;color:var(--sub);line-height:1.7;}
-.modal-section-value.highlight{color:var(--text);}
-.modal-actions{display:flex;gap:8px;flex-wrap:wrap;padding:16px 24px;border-top:1px solid var(--border);}
-.modal-btn{background:var(--bg3);border:1px solid var(--border);color:var(--sub);font-family:var(--font-mono);font-size:11px;padding:7px 14px;cursor:pointer;border-radius:3px;transition:all .15s;}
-.modal-btn:hover{border-color:var(--accent);color:var(--text);}
-.modal-btn.done-btn:hover  {border-color:var(--done-c);color:var(--done-c);}
-.modal-btn.snooze-btn:hover{border-color:var(--snooze-c);color:var(--snooze-c);}
-.modal-btn.urgent-btn:hover{border-color:var(--urgent);color:var(--urgent);}
-.modal-btn.normal-btn:hover{border-color:var(--normal);color:var(--normal);}
-.modal-btn.reopen-btn:hover{border-color:var(--normal);color:var(--normal);}
-.modal-btn.delete-btn:hover{border-color:var(--urgent);color:var(--urgent);}
+  .nav-item:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+  .nav-item.active { 
+    color: var(--text); 
+    border-left-color: var(--accent-orange);
+    background: rgba(245,166,35,0.06);
+  }
 
-/* CARDS */
-.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;}
-.card{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:18px;transition:border-color .15s;}
-.card:hover{border-color:var(--accent);}
-.card-name{font-weight:600;font-size:15px;color:var(--text);margin-bottom:6px;}
-.card-meta{font-size:12px;color:var(--sub);line-height:1.7;margin-bottom:10px;}
-.card-tags{display:flex;flex-wrap:wrap;gap:5px;}
-.card-notes{margin-top:10px;font-size:12px;color:var(--sub);line-height:1.6;}
+  .nav-icon { font-size: 16px; width: 18px; text-align: center; }
 
-/* ASK */
-.ask-panel{max-width:760px;}
-.ask-label{font-family:var(--font-mono);font-size:10px;color:var(--sub);text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px;}
-.ask-webhook-row{display:flex;align-items:center;gap:8px;margin-bottom:14px;background:var(--bg2);border:1px solid var(--border);border-radius:3px;padding:10px 14px;}
-.ask-webhook-label{font-family:var(--font-mono);font-size:10px;color:var(--sub);text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;}
-.ask-webhook-input{flex:1;background:none;border:none;color:var(--accent);font-family:var(--font-mono);font-size:11px;outline:none;}
-.ask-webhook-input::placeholder{color:var(--muted);}
-.ask-input-row{display:flex;gap:8px;margin-bottom:14px;}
-.ask-input{flex:1;background:var(--bg2);border:1px solid var(--border);color:var(--text);font-family:var(--font-sans);font-size:13px;padding:11px 14px;border-radius:3px;transition:border-color .15s;}
-.ask-input:focus{outline:none;border-color:var(--accent);}
-.ask-input::placeholder{color:var(--muted);}
-.ask-btn{background:var(--accent);border:none;color:#000;font-family:var(--font-mono);font-size:12px;font-weight:600;padding:11px 22px;cursor:pointer;border-radius:3px;transition:background .15s;white-space:nowrap;}
-.ask-btn:hover{background:#ffbb25;}
-.ask-btn:disabled{background:var(--border);color:var(--muted);cursor:not-allowed;}
-.ask-suggestions{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:18px;}
-.ask-suggestion{background:var(--bg2);border:1px solid var(--border);color:var(--sub);font-size:12px;padding:6px 13px;border-radius:3px;cursor:pointer;transition:all .15s;}
-.ask-suggestion:hover{border-color:var(--accent);color:var(--text);}
-.ask-note{font-size:12px;color:var(--sub);line-height:1.6;background:var(--bg3);border:1px solid var(--border);border-left:3px solid var(--accent);padding:12px 16px;border-radius:3px;margin-bottom:14px;}
-.ask-note strong{color:var(--text);}
-.ask-response{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:20px;display:none;}
-.ask-response.visible{display:block;}
-.ask-response-label{font-family:var(--font-mono);font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;}
-.ask-response-text{font-size:13px;line-height:1.8;color:var(--text);white-space:pre-wrap;}
+  .nav-badge {
+    margin-left: auto;
+    background: rgba(255,77,77,0.15);
+    color: var(--accent-red);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,77,77,0.2);
+  }
 
-/* TOAST */
-.toast{position:fixed;bottom:24px;right:24px;background:var(--bg3);border:1px solid var(--border);border-left:3px solid var(--accent);padding:12px 18px;font-family:var(--font-mono);font-size:12px;color:var(--text);border-radius:3px;opacity:0;transform:translateY(10px);transition:all .2s;z-index:300;pointer-events:none;}
-.toast.show{opacity:1;transform:translateY(0);}
-.toast.error{border-left-color:var(--urgent);}
+  .sidebar-footer {
+    padding: 20px 24px;
+    border-top: 1px solid var(--border);
+  }
 
-::-webkit-scrollbar{width:6px;height:6px}
-::-webkit-scrollbar-track{background:var(--bg)}
-::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+  .user-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--card);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+
+  .user-avatar {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--accent-orange), var(--accent-purple));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; color: white;
+    font-family: 'Syne', sans-serif;
+  }
+
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 13px; font-weight: 500; color: var(--text); }
+  .user-role { font-size: 11px; color: var(--muted); }
+
+  /* ─── MAIN CONTENT ─── */
+  .main {
+    margin-left: 220px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* ─── TOPBAR ─── */
+  .topbar {
+    padding: 20px 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: rgba(10,13,20,0.8);
+    backdrop-filter: blur(20px);
+    position: sticky; top: 0; z-index: 50;
+  }
+
+  .topbar-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    flex: 1;
+  }
+
+  .topbar-title span { color: var(--muted); font-weight: 400; font-size: 14px; margin-left: 12px; font-family: 'DM Sans', sans-serif; }
+
+  .search-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 9px 16px;
+    width: 280px;
+    transition: border-color 0.2s;
+  }
+
+  .search-bar:focus-within { border-color: var(--border-active); }
+  .search-bar input {
+    background: none; border: none; outline: none;
+    color: var(--text); font-size: 13px; font-family: 'DM Sans', sans-serif;
+    width: 100%;
+  }
+  .search-bar input::placeholder { color: var(--muted); }
+  .search-icon { color: var(--muted); font-size: 14px; }
+
+  .btn-icon {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-size: 16px;
+  }
+  .btn-icon:hover { border-color: var(--border-active); color: var(--text); }
+
+  .pulse-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent-red);
+    box-shadow: 0 0 8px var(--accent-red);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(0.85); }
+  }
+
+  /* ─── CONTENT AREA ─── */
+  .content { padding: 28px 32px; flex: 1; }
+
+  /* ─── INSIGHT HEADER ─── */
+  .insight-header {
+    margin-bottom: 28px;
+  }
+
+  .insight-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .insight-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+
+  /* ─── STATS GRID ─── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 22px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent-color, var(--accent-blue));
+    opacity: 0.6;
+  }
+
+  .stat-card:hover { border-color: var(--border-active); transform: translateY(-1px); }
+
+  .stat-card.urgent { --accent-color: var(--urgent); }
+  .stat-card.high { --accent-color: var(--high); }
+  .stat-card.actions { --accent-color: var(--accent-blue); }
+  .stat-card.recent { --accent-color: var(--accent-purple); }
+
+  .stat-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .stat-row { display: flex; align-items: flex-end; justify-content: space-between; }
+
+  .stat-number {
+    font-family: 'Syne', sans-serif;
+    font-size: 36px;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--text);
+  }
+
+  .stat-icon { font-size: 22px; opacity: 0.5; }
+  .stat-card.urgent .stat-icon { color: var(--urgent); }
+  .stat-card.high .stat-icon { color: var(--high); }
+  .stat-card.actions .stat-icon { color: var(--accent-blue); }
+  .stat-card.recent .stat-icon { color: var(--accent-purple); }
+
+  /* ─── SECTION HEADER ─── */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    flex: 1;
+  }
+
+  .section-count {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 400;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  /* ─── FILTER BAR ─── */
+  .filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .filter-chip {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .filter-chip:hover { border-color: var(--border-active); color: var(--text); }
+  .filter-chip.active {
+    background: rgba(245,166,35,0.1);
+    border-color: rgba(245,166,35,0.3);
+    color: var(--accent-orange);
+  }
+
+  .filter-sep { width: 1px; height: 20px; background: var(--border); }
+
+  /* ─── ITEM CARDS ─── */
+  .items-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .item-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+    animation: fadeIn 0.3s ease both;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .item-card:hover { border-color: var(--border-active); background: var(--card-hover); }
+
+  .item-card-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .item-meta { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+  .item-date { font-size: 12px; color: var(--muted); }
+
+  .badge {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
+
+  .badge-new { background: rgba(75,158,255,0.12); color: #7bb8ff; border: 1px solid rgba(75,158,255,0.2); }
+  .badge-urgent { background: rgba(255,77,77,0.12); color: #ff7070; border: 1px solid rgba(255,77,77,0.2); }
+  .badge-high { background: rgba(245,166,35,0.12); color: var(--accent-orange); border: 1px solid rgba(245,166,35,0.2); }
+  .badge-medium { background: rgba(75,158,255,0.12); color: var(--accent-blue); border: 1px solid rgba(75,158,255,0.2); }
+  .badge-low { background: rgba(61,214,140,0.12); color: var(--accent-green); border: 1px solid rgba(61,214,140,0.2); }
+  .badge-fyi { background: rgba(90,100,120,0.2); color: var(--muted); border: 1px solid var(--border); }
+  .badge-done { background: rgba(61,214,140,0.08); color: #3dd68c88; border: 1px solid rgba(61,214,140,0.15); }
+  .badge-snoozed { background: rgba(90,100,120,0.12); color: var(--muted); border: 1px solid var(--border); }
+
+  .item-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
+
+  .item-summary {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.55;
+    margin-bottom: 14px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .item-footer {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .relevance-block { display: flex; align-items: center; gap: 10px; flex: 1; }
+  .relevance-label { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); width: 70px; }
+
+  .relevance-bar {
+    flex: 1;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    max-width: 180px;
+  }
+
+  .relevance-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: var(--bar-color, var(--accent-blue));
+    transition: width 0.6s ease;
+  }
+
+  .relevance-score {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--bar-color, var(--accent-blue));
+    min-width: 32px;
+    text-align: right;
+  }
+
+  .item-source {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .item-actions {
+    display: flex;
+    gap: 6px;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .item-card:hover .item-actions { opacity: 1; }
+
+  .action-btn {
+    padding: 5px 10px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .action-btn:hover { border-color: var(--border-active); color: var(--text); }
+  .action-btn.done:hover { border-color: rgba(61,214,140,0.3); color: var(--accent-green); }
+  .action-btn.del:hover { border-color: rgba(255,77,77,0.3); color: var(--accent-red); }
+
+  /* ─── TABS ─── */
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* ─── CONTACTS TAB ─── */
+  .contacts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+
+  .contact-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 20px;
+    transition: all 0.2s;
+  }
+  .contact-card:hover { border-color: var(--border-active); }
+
+  .contact-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+
+  .contact-avatar {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .contact-name { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 600; }
+  .contact-company { font-size: 12px; color: var(--muted); margin-top: 1px; }
+  .contact-importance { margin-left: auto; }
+
+  .contact-role { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* ─── PROJECTS TAB ─── */
+  .projects-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .project-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.2s;
+  }
+  .project-card:hover { border-color: var(--border-active); }
+
+  .project-stripe { width: 3px; height: 40px; border-radius: 2px; flex-shrink: 0; }
+  .project-info { flex: 1; }
+  .project-name { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 600; margin-bottom: 3px; }
+  .project-partner { font-size: 12px; color: var(--muted); }
+  .project-deadline { font-size: 12px; color: var(--muted); text-align: right; }
+  .project-deadline strong { display: block; color: var(--text); font-size: 13px; }
+
+  /* ─── ASK PANEL ─── */
+  .ask-panel { max-width: 760px; }
+
+  .ask-input-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 4px 4px 4px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    transition: border-color 0.2s;
+  }
+  .ask-input-wrap:focus-within { border-color: rgba(245,166,35,0.4); }
+
+  .ask-input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    padding: 14px 0;
+  }
+  .ask-input::placeholder { color: var(--muted); }
+
+  .ask-btn {
+    background: var(--accent-orange);
+    color: #0a0d14;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: 'Syne', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .ask-btn:hover { background: #f0b83a; transform: scale(1.02); }
+  .ask-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .ask-response {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text);
+    min-height: 100px;
+    display: none;
+  }
+  .ask-response.visible { display: block; }
+
+  .ask-thinking {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .thinking-dots { display: flex; gap: 4px; }
+  .thinking-dots span {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent-orange);
+    animation: dot 1.4s infinite ease-in-out;
+  }
+  .thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes dot {
+    0%, 80%, 100% { transform: scale(0.7); opacity: 0.4; }
+    40% { transform: scale(1); opacity: 1; }
+  }
+
+  .ask-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .suggestion-chip {
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .suggestion-chip:hover { border-color: rgba(245,166,35,0.3); color: var(--accent-orange); }
+
+  /* ─── MODAL ─── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border-active);
+    border-radius: 18px;
+    padding: 28px;
+    max-width: 560px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    animation: modalIn 0.2s ease;
+  }
+
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .modal-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 20px; }
+  .modal-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; flex: 1; line-height: 1.3; }
+  .modal-close { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border); background: none; color: var(--muted); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+
+  .modal-field { margin-bottom: 14px; }
+  .modal-field-label { font-size: 10px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
+  .modal-field-value { font-size: 13px; color: var(--text); line-height: 1.6; }
+
+  .modal-actions { display: flex; gap: 8px; margin-top: 22px; flex-wrap: wrap; }
+
+  .btn-primary {
+    padding: 9px 18px;
+    background: var(--accent-orange);
+    color: #0a0d14;
+    border: none;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: 'Syne', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-primary:hover { background: #f0b83a; }
+
+  .btn-secondary {
+    padding: 9px 18px;
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-secondary:hover { border-color: var(--border-active); color: var(--text); }
+
+  .btn-danger {
+    padding: 9px 18px;
+    background: rgba(255,77,77,0.1);
+    color: var(--accent-red);
+    border: 1px solid rgba(255,77,77,0.2);
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    margin-left: auto;
+    transition: all 0.15s;
+  }
+  .btn-danger:hover { background: rgba(255,77,77,0.15); }
+
+  /* ─── LOADING ─── */
+  .loading-state { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 60px; color: var(--muted); font-size: 14px; }
+  .spinner { width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--accent-orange); border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .empty-state { text-align: center; padding: 60px; color: var(--muted); }
+  .empty-icon { font-size: 36px; margin-bottom: 12px; opacity: 0.4; }
+  .empty-text { font-size: 14px; }
+
+  /* ─── SCROLLBAR ─── */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--subtle); }
+
+  /* CONFIG NOTICE */
+  .config-notice {
+    background: rgba(245,166,35,0.08);
+    border: 1px solid rgba(245,166,35,0.2);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--accent-orange);
+    margin-bottom: 20px;
+    display: none;
+  }
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
-<div class="header">
-  <div class="logo">Second Brain <span>/ Jürgen Oskamp</span></div>
-  <div class="header-right">
-    <div class="header-time" id="header-time"></div>
-    <button class="btn-sm" onclick="loadAll()">↻ Refresh</button>
-  </div>
-</div>
+<!-- ─── CONFIG ─── -->
+<script>
+  const CONFIG = {
+    supabaseUrl: 'https://lnupagxyhlbnhivsrvlg.supabase.co',
+    supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxudXBhZ3h5aGxibmhpdnNydmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNzI0NjIsImV4cCI6MjA4ODc0ODQ2Mn0.3BkUalPRqw5i4_igl1mNtX2ID4_zZk67wNMmFnPp8mQ'
+    askWebhook: 'https://hook.eu2.make.com/3vjh4j3pfuab2a2p3vfvr2bwftv7hcik', // ← Vervang dit (optioneel)
+  };
+</script>
 
-<!-- STATS -->
-<div class="stats-bar">
-  <div class="stat urgent" onclick="quickFilter('priority','Urgent')">
-    <div class="stat-value" id="stat-urgent">—</div>
-    <div class="stat-label">Urgent</div>
-  </div>
-  <div class="stat high" onclick="quickFilter('priority','High')">
-    <div class="stat-value" id="stat-high">—</div>
-    <div class="stat-label">High priority</div>
-  </div>
-  <div class="stat action" onclick="quickFilter('action',true)">
-    <div class="stat-value" id="stat-action">—</div>
-    <div class="stat-label">Action required</div>
-  </div>
-  <div class="stat open" onclick="quickFilter('status','new')">
-    <div class="stat-value" id="stat-open">—</div>
-    <div class="stat-label">Open</div>
-  </div>
-  <div class="stat total" onclick="clearFilters()">
-    <div class="stat-value" id="stat-total">—</div>
-    <div class="stat-label">Total items</div>
-  </div>
-</div>
-
-<!-- TABS -->
-<div class="tabs">
-  <div class="tab active" onclick="switchTab('items')">Items</div>
-  <div class="tab" onclick="switchTab('contacts')">Contacts</div>
-  <div class="tab" onclick="switchTab('projects')">Projects</div>
-  <div class="tab" onclick="switchTab('ask')">Ask</div>
-</div>
-
-<!-- MAIN -->
-<div class="main">
-
-  <!-- ITEMS -->
-  <div class="panel active" id="panel-items">
-    <div class="filters">
-      <div class="filter-group">
-        <span class="filter-label">Status</span>
-        <button class="filter-btn active" id="sf-all"     onclick="setFilter('status','all',this)">All</button>
-        <button class="filter-btn"        id="sf-new"     onclick="setFilter('status','new',this)">New</button>
-        <button class="filter-btn"        id="sf-done"    onclick="setFilter('status','done',this)">Done</button>
-        <button class="filter-btn"        id="sf-snoozed" onclick="setFilter('status','snoozed',this)">Snoozed</button>
-      </div>
-      <div class="filter-sep"></div>
-      <div class="filter-group">
-        <span class="filter-label">Priority</span>
-        <button class="filter-btn active" id="pf-all"    onclick="setFilter('priority','all',this)">All</button>
-        <button class="filter-btn"        id="pf-urgent" onclick="setFilter('priority','Urgent',this)">Urgent</button>
-        <button class="filter-btn"        id="pf-high"   onclick="setFilter('priority','High',this)">High</button>
-        <button class="filter-btn"        id="pf-normal" onclick="setFilter('priority','Normal',this)">Normal</button>
-      </div>
-      <div class="filter-sep"></div>
-      <div class="filter-group">
-        <span class="filter-label">Source</span>
-        <button class="filter-btn active" id="src-all"      onclick="setFilter('source','all',this)">All</button>
-        <button class="filter-btn"        id="src-email"    onclick="setFilter('source','email',this)">Email</button>
-        <button class="filter-btn"        id="src-telegram" onclick="setFilter('source','telegram',this)">Telegram</button>
-      </div>
-      <input type="text" class="search-input" id="search-input" placeholder="Search..." oninput="setSearch(this.value)">
-    </div>
-    <div id="items-container"><div class="loading">Loading<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div></div>
-  </div>
-
-  <!-- CONTACTS -->
-  <div class="panel" id="panel-contacts">
-    <div id="contacts-container"><div class="loading">Loading<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div></div>
-  </div>
-
-  <!-- PROJECTS -->
-  <div class="panel" id="panel-projects">
-    <div id="projects-container"><div class="loading">Loading<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div></div>
-  </div>
-
-  <!-- ASK -->
-  <div class="panel" id="panel-ask">
-    <div class="ask-panel">
-      <div class="ask-label">Ask your Second Brain</div>
-      <div class="ask-note">
-        <strong>Webhook URL required.</strong> Paste your Make webhook URL below — it is saved per device in your browser. See the setup instructions above this dashboard for how to create it in Make.
-      </div>
-      <div class="ask-webhook-row">
-        <span class="ask-webhook-label">Webhook URL</span>
-        <input type="text" class="ask-webhook-input" id="webhook-url" placeholder="https://hook.eu2.make.com/..." oninput="saveWebhook(this.value)">
-      </div>
-      <div class="ask-input-row">
-        <input type="text" class="ask-input" id="ask-input" placeholder="e.g. What are my open commitments for Little Nirvana?" onkeydown="if(event.key==='Enter')askBrain()">
-        <button class="ask-btn" id="ask-btn" onclick="askBrain()">Ask →</button>
-      </div>
-      <div class="ask-suggestions">
-        <div class="ask-suggestion" onclick="askQuick('What are my urgent items this week?')">Urgent this week</div>
-        <div class="ask-suggestion" onclick="askQuick('What are my open action items?')">Open actions</div>
-        <div class="ask-suggestion" onclick="askQuick('What is the status of the IraSME project?')">IraSME status</div>
-        <div class="ask-suggestion" onclick="askQuick('What do I need to follow up with Barbara about?')">Follow-ups Barbara</div>
-        <div class="ask-suggestion" onclick="askQuick('What are my high priority emails?')">High priority emails</div>
-        <div class="ask-suggestion" onclick="askQuick('Summarise everything that happened this week.')">This week summary</div>
-      </div>
-      <div class="ask-response" id="ask-response">
-        <div class="ask-response-label">Second Brain</div>
-        <div class="ask-response-text" id="ask-response-text"></div>
-      </div>
-    </div>
-  </div>
-
-</div>
-
-<!-- ITEM MODAL -->
-<div class="modal-overlay" id="modal-overlay" onclick="closeModalOnOverlay(event)">
+<!-- ─── MODAL ─── -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
   <div class="modal" id="modal">
     <div class="modal-header">
-      <div class="modal-title" id="modal-title"></div>
+      <div class="modal-title" id="modalTitle">—</div>
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
-    <div class="modal-body">
-      <div class="modal-badges" id="modal-badges"></div>
-      <div id="modal-fields"></div>
-    </div>
-    <div class="modal-actions" id="modal-actions"></div>
+    <div id="modalBody"></div>
+    <div class="modal-actions" id="modalActions"></div>
   </div>
 </div>
 
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
+<!-- ─── APP ─── -->
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-dot"></div>
+      Second Brain
+    </div>
+    <nav class="nav">
+      <div class="nav-section">Capture</div>
+      <div class="nav-item active" onclick="switchTab('items', this)">
+        <span class="nav-icon">⚡</span> Items
+        <span class="nav-badge" id="urgentBadge">—</span>
+      </div>
+      <div class="nav-item" onclick="switchTab('contacts', this)">
+        <span class="nav-icon">👤</span> Contacts
+      </div>
+      <div class="nav-item" onclick="switchTab('projects', this)">
+        <span class="nav-icon">📁</span> Projects
+      </div>
+
+      <div class="nav-section" style="margin-top:12px">Intelligence</div>
+      <div class="nav-item" onclick="switchTab('ask', this)">
+        <span class="nav-icon">✦</span> Ask
+      </div>
+
+      <div class="nav-section" style="margin-top:12px">Sources</div>
+      <div class="nav-item">
+        <span class="nav-icon">📧</span> Email
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon">💬</span> Telegram
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar">JO</div>
+        <div class="user-info">
+          <div class="user-name">Jürgen Oskamp</div>
+          <div class="user-role">Superellipse · LN</div>
+        </div>
+        <div class="pulse-dot"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-title" id="pageTitle">
+        Priority Feed <span id="pageSub">loading...</span>
+      </div>
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Search items..." oninput="onSearch()">
+      </div>
+      <button class="btn-icon" onclick="loadAll()" title="Refresh">↻</button>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <!-- CONFIG NOTICE -->
+      <div class="config-notice" id="configNotice">
+        ⚠️ Vervang <code>YOUR_SUPABASE_ANON_KEY</code> in de CONFIG sectie bovenaan het script om live data te laden.
+      </div>
+
+      <!-- ─── ITEMS TAB ─── -->
+      <div class="tab-content active" id="tab-items">
+
+        <div class="insight-header">
+          <div class="insight-label">Status Overview</div>
+          <div class="insight-title">Curator Insight</div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card urgent" onclick="applyFilter('priority','urgent')">
+            <div class="stat-label">Urgent</div>
+            <div class="stat-row">
+              <div class="stat-number" id="statUrgent">—</div>
+              <div class="stat-icon">!</div>
+            </div>
+          </div>
+          <div class="stat-card high" onclick="applyFilter('priority','high')">
+            <div class="stat-label">High Priority</div>
+            <div class="stat-row">
+              <div class="stat-number" id="statHigh">—</div>
+              <div class="stat-icon">⚡</div>
+            </div>
+          </div>
+          <div class="stat-card actions" onclick="applyFilter('action','yes')">
+            <div class="stat-label">Actions</div>
+            <div class="stat-row">
+              <div class="stat-number" id="statActions">—</div>
+              <div class="stat-icon">↗</div>
+            </div>
+          </div>
+          <div class="stat-card recent" onclick="applyFilter('source','recent')">
+            <div class="stat-label">Recent (24h)</div>
+            <div class="stat-row">
+              <div class="stat-number" id="statRecent">—</div>
+              <div class="stat-icon">◷</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-header">
+          <div class="section-title">Priority Feed</div>
+          <span class="section-count" id="itemCount">loading...</span>
+        </div>
+
+        <div class="filter-bar">
+          <button class="filter-chip active" onclick="setPriorityFilter('all',this)">All</button>
+          <button class="filter-chip" onclick="setPriorityFilter('urgent',this)">🔴 Urgent</button>
+          <button class="filter-chip" onclick="setPriorityFilter('high',this)">🟠 High</button>
+          <button class="filter-chip" onclick="setPriorityFilter('medium',this)">🔵 Medium</button>
+          <div class="filter-sep"></div>
+          <button class="filter-chip" onclick="setSourceFilter('email',this)">Email</button>
+          <button class="filter-chip" onclick="setSourceFilter('telegram',this)">Telegram</button>
+          <div class="filter-sep"></div>
+          <button class="filter-chip" onclick="setActionFilter(this)">Action required</button>
+        </div>
+
+        <div class="items-list" id="itemsList">
+          <div class="loading-state"><div class="spinner"></div> Loading items...</div>
+        </div>
+
+      </div>
+
+      <!-- ─── CONTACTS TAB ─── -->
+      <div class="tab-content" id="tab-contacts">
+        <div class="insight-header">
+          <div class="insight-label">People</div>
+          <div class="insight-title">Contacts</div>
+        </div>
+        <div class="contacts-grid" id="contactsList">
+          <div class="loading-state"><div class="spinner"></div> Loading contacts...</div>
+        </div>
+      </div>
+
+      <!-- ─── PROJECTS TAB ─── -->
+      <div class="tab-content" id="tab-projects">
+        <div class="insight-header">
+          <div class="insight-label">Work</div>
+          <div class="insight-title">Projects</div>
+        </div>
+        <div class="projects-list" id="projectsList">
+          <div class="loading-state"><div class="spinner"></div> Loading projects...</div>
+        </div>
+      </div>
+
+      <!-- ─── ASK TAB ─── -->
+      <div class="tab-content" id="tab-ask">
+        <div class="insight-header">
+          <div class="insight-label">Intelligence Layer</div>
+          <div class="insight-title">Ask Second Brain</div>
+        </div>
+
+        <div class="ask-panel">
+          <div class="ask-suggestions">
+            <div class="suggestion-chip" onclick="fillQuestion(this)">What are my open commitments this week?</div>
+            <div class="suggestion-chip" onclick="fillQuestion(this)">What is the status of Little Nirvana?</div>
+            <div class="suggestion-chip" onclick="fillQuestion(this)">What needs my attention today?</div>
+            <div class="suggestion-chip" onclick="fillQuestion(this)">Summarize recent contact with Barbara Weyn</div>
+          </div>
+
+          <div class="ask-input-wrap">
+            <input class="ask-input" id="askInput" type="text" placeholder="Ask anything about your information..." onkeydown="if(event.key==='Enter')sendAsk()">
+            <button class="ask-btn" id="askBtn" onclick="sendAsk()">Ask →</button>
+          </div>
+
+          <div class="ask-response" id="askResponse"></div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </main>
+</div>
 
 <script>
-const SB_URL = 'https://lnupagxyhlbnhivsrvlg.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxudXBhZ3h5aGxibmhpdnNydmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNzI0NjIsImV4cCI6MjA4ODc0ODQ2Mn0.3BkUalPRqw5i4_igl1mNtX2ID4_zZk67wNMmFnPp8mQ';
-
+// ─── STATE ───────────────────────────────────────────────
 let allItems = [];
-let filters  = { status:'all', priority:'all', source:'all', search:'', actionOnly:false };
-let currentModalId = null;
+let filters = { priority: null, source: null, action: false, search: '' };
 
-// ── SUPABASE ──────────────────────────────────────────────────────────
-async function sbGet(path) {
-  const r = await fetch(`${SB_URL}/rest/v1/${path}`, {
-    headers:{ apikey:SB_KEY, Authorization:`Bearer ${SB_KEY}` }
+const avatarColors = ['#f5a623','#4b9eff','#a78bfa','#3dd68c','#ff6b6b','#f093fb'];
+
+// ─── SUPABASE HELPERS ────────────────────────────────────
+async function supabase(path, opts = {}) {
+  const url = CONFIG.supabaseUrl + '/rest/v1/' + path;
+  const res = await fetch(url, {
+    headers: {
+      'apikey': CONFIG.supabaseKey,
+      'Authorization': 'Bearer ' + CONFIG.supabaseKey,
+      'Content-Type': 'application/json',
+      'Prefer': opts.prefer || '',
+      ...opts.headers
+    },
+    method: opts.method || 'GET',
+    body: opts.body ? JSON.stringify(opts.body) : undefined
   });
-  if (!r.ok) throw new Error(await r.text());
-  return r.json();
-}
-async function sbPatch(path, body) {
-  const r = await fetch(`${SB_URL}/rest/v1/${path}`, {
-    method:'PATCH',
-    headers:{ apikey:SB_KEY, Authorization:`Bearer ${SB_KEY}`, 'Content-Type':'application/json', Prefer:'return=minimal' },
-    body:JSON.stringify(body)
-  });
-  if (!r.ok) throw new Error(await r.text());
-}
-async function sbSoftDelete(id) {
-  await sbPatch(`items?id=eq.${id}`, { deleted: true });
+  if (!res.ok) throw new Error(await res.text());
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
 }
 
-// ── CLOCK ─────────────────────────────────────────────────────────────
-function updateClock() {
-  const n = new Date();
-  document.getElementById('header-time').textContent =
-    n.toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short'}) + ' ' +
-    n.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-}
-
-// ── TOAST ─────────────────────────────────────────────────────────────
-function toast(msg, err=false) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'toast show'+(err?' error':'');
-  setTimeout(()=>el.className='toast', 2600);
-}
-
-// ── LOAD ──────────────────────────────────────────────────────────────
+// ─── INIT ────────────────────────────────────────────────
 async function loadAll() {
+  if (CONFIG.supabaseKey === 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxudXBhZ3h5aGxibmhpdnNydmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNzI0NjIsImV4cCI6MjA4ODc0ODQ2Mn0.3BkUalPRqw5i4_igl1mNtX2ID4_zZk67wNMmFnPp8mQ') {
+    document.getElementById('configNotice').style.display = 'block';
+    loadMockData();
+    return;
+  }
   await Promise.all([loadItems(), loadContacts(), loadProjects()]);
 }
 
-// ── ITEMS ─────────────────────────────────────────────────────────────
+// ─── ITEMS ───────────────────────────────────────────────
 async function loadItems() {
   try {
-    allItems = await sbGet('items?select=*&deleted=eq.false&order=created_at.desc&limit=300');
+    const data = await supabase(
+      'items?deleted=is.false&or=(status.is.null,status.not.in.(done,snoozed))' +
+      '&select=id,title,summary,priority,status,source,category,relevance_score,action_required,action_description,due_date,sender_name,created_at,received_at' +
+      '&order=relevance_score.desc.nullslast,created_at.desc&limit=100'
+    );
+    allItems = data || [];
     updateStats();
     renderItems();
   } catch(e) {
-    document.getElementById('items-container').innerHTML = `<div class="empty">Error loading items: ${x(e.message)}</div>`;
+    document.getElementById('itemsList').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">${e.message}</div></div>`;
   }
 }
 
 function updateStats() {
-  const active = allItems.filter(i => !i.status || i.status === 'new' || i.status === 'in-progress');
-  document.getElementById('stat-total').textContent  = allItems.length;
-  document.getElementById('stat-urgent').textContent = active.filter(i=>i.priority==='Urgent').length;
-  document.getElementById('stat-high').textContent   = active.filter(i=>i.priority==='High').length;
-  document.getElementById('stat-action').textContent = active.filter(i=>i.action_required===true).length;
-  document.getElementById('stat-open').textContent   = active.length;
+  const now = Date.now();
+  const day = 86400000;
+  document.getElementById('statUrgent').textContent = allItems.filter(i => i.priority === 'urgent').length;
+  document.getElementById('statHigh').textContent = allItems.filter(i => i.priority === 'high').length;
+  document.getElementById('statActions').textContent = allItems.filter(i => i.action_required === true || i.action_required === 'true').length;
+  document.getElementById('statRecent').textContent = allItems.filter(i => (now - new Date(i.received_at || i.created_at).getTime()) < day).length;
+
+  const urgentCount = allItems.filter(i => i.priority === 'urgent').length;
+  document.getElementById('urgentBadge').textContent = urgentCount || '—';
 }
 
-function applyFilters(items) {
-  return items.filter(i => {
-    const s = i.status||'new';
-    if (filters.status !== 'all' && s !== filters.status) return false;
-    if (filters.priority !== 'all' && i.priority !== filters.priority) return false;
-    if (filters.source !== 'all' && i.source !== filters.source) return false;
-    if (filters.actionOnly && !i.action_required) return false;
+function filteredItems() {
+  return allItems.filter(item => {
+    if (filters.priority && filters.priority !== 'all' && item.priority !== filters.priority) return false;
+    if (filters.source && item.source?.toLowerCase() !== filters.source) return false;
+    if (filters.action && item.action_required !== true && item.action_required !== 'true') return false;
     if (filters.search) {
       const q = filters.search.toLowerCase();
-      if (!(i.title||'').toLowerCase().includes(q) && !(i.summary||'').toLowerCase().includes(q)) return false;
+      if (!item.title?.toLowerCase().includes(q) && !item.summary?.toLowerCase().includes(q)) return false;
     }
     return true;
   });
 }
 
 function renderItems() {
-  const list = applyFilters(allItems);
-  const el   = document.getElementById('items-container');
-  if (!list.length) { el.innerHTML='<div class="empty">No items match current filters.</div>'; return; }
+  const items = filteredItems();
+  const el = document.getElementById('itemsList');
+  document.getElementById('itemCount').textContent = `Showing ${items.length} active items`;
+  document.getElementById('pageSub').textContent = `${allItems.length} active`;
 
-  const rows = list.map(i => {
-    const pri = i.priority||'Normal';
-    const sta = i.status||'new';
-    const src = i.source||'';
-    const rel = i.relevance_score||0;
-    const dt  = i.created_at ? new Date(i.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}) : '';
+  if (!items.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">No items match the current filter</div></div>';
+    return;
+  }
 
-    const btns = buildActionBtns(i, false);
+  el.innerHTML = items.map((item, i) => {
+    const score = item.relevance_score || 0;
+    const barColor = score >= 8 ? 'var(--accent-orange)' : score >= 5 ? 'var(--accent-blue)' : 'var(--muted)';
+    const date = new Date(item.received_at || item.created_at);
+    const dateStr = date.toLocaleDateString('nl-BE', {day:'numeric', month:'short'});
+    const prio = item.priority || 'low';
+    const status = item.status || 'new';
 
-    return `<tr onclick="openModal('${i.id}')" title="Click to view details">
-      <td>
-        <div class="item-title">${x(i.title||'—')}</div>
-        <div class="item-summary">${x(i.summary||'')}</div>
-        ${i.action_required?`<div class="item-action">▶ ${x(i.action_description||'Action required')}</div>`:''}
-      </td>
-      <td><span class="badge badge-${pri.toLowerCase()}">${pri}</span></td>
-      <td><span class="badge badge-${sta}">${sta}</span></td>
-      <td><span class="badge badge-${src}">${src||'—'}</span></td>
-      <td><div class="rel-bar"><div class="rel-track"><div class="rel-fill" style="width:${rel*10}%"></div></div><span class="rel-num">${rel}/10</span></div></td>
-      <td style="font-family:var(--font-mono);font-size:11px;color:var(--sub);white-space:nowrap">${dt}</td>
-      <td onclick="event.stopPropagation()"><div class="actions">${btns}</div></td>
-    </tr>`;
+    return `<div class="item-card" style="animation-delay:${i*30}ms" onclick="openItem(${JSON.stringify({...item}).replace(/"/g,'&quot;')})">
+      <div class="item-card-top">
+        <span class="badge badge-${status}">${status.toUpperCase()}</span>
+        <span class="badge badge-${prio}">${prio.toUpperCase()}</span>
+        ${item.action_required === true || item.action_required === 'true' ? '<span class="badge badge-new">ACTION</span>' : ''}
+        <div class="item-meta">
+          <span class="item-date">${dateStr}</span>
+          <div class="item-actions">
+            <button class="action-btn done" onclick="markDone('${item.id}',event)">✓ Done</button>
+            <button class="action-btn" onclick="snoozeItem('${item.id}',event)">⏸ Snooze</button>
+            <button class="action-btn del" onclick="deleteItem('${item.id}',event)">✕</button>
+          </div>
+        </div>
+      </div>
+      <div class="item-title">${item.title || '(no title)'}</div>
+      ${item.summary ? `<div class="item-summary">${item.summary}</div>` : ''}
+      <div class="item-footer">
+        <div class="relevance-block">
+          <span class="relevance-label">Relevance</span>
+          <div class="relevance-bar"><div class="relevance-fill" style="width:${score*10}%;--bar-color:${barColor}"></div></div>
+          <span class="relevance-score" style="--bar-color:${barColor}">${score} / 10</span>
+        </div>
+        <span class="item-source">Source: ${(item.source || '—').toUpperCase()}</span>
+      </div>
+    </div>`;
   }).join('');
-
-  el.innerHTML = `<table class="items-table">
-    <thead><tr>
-      <th>Title / Summary</th><th>Priority</th><th>Status</th>
-      <th>Source</th><th>Relevance</th><th>Date</th><th>Actions</th>
-    </tr></thead>
-    <tbody>${rows}</tbody>
-  </table>
-  <div class="count-line">Showing ${list.length} of ${allItems.length} items — click any row for details</div>`;
 }
 
-function buildActionBtns(item, isModal) {
-  const cls = isModal ? 'modal-btn' : 'action-btn';
-  const fn  = isModal ? 'modalAct' : 'act';
-  const sta = item.status||'new';
-  const pri = item.priority||'Normal';
-  const id  = item.id;
-  let btns  = '';
-
-  if (sta !== 'done')    btns += `<button class="${cls} done-btn"   onclick="${fn}('${id}','done')">✓ Done</button>`;
-  if (sta === 'done')    btns += `<button class="${cls} reopen-btn" onclick="${fn}('${id}','reopen')">↩ Reopen</button>`;
-  if (sta !== 'snoozed' && sta !== 'done') btns += `<button class="${cls} snooze-btn" onclick="${fn}('${id}','snooze')">💤 Snooze</button>`;
-  if (pri !== 'Urgent')  btns += `<button class="${cls} urgent-btn" onclick="${fn}('${id}','urgent')">🚨 Urgent</button>`;
-  if (pri !== 'Normal')  btns += `<button class="${cls} normal-btn" onclick="${fn}('${id}','normal')">↓ Normal</button>`;
-  if (pri !== 'High' && pri !== 'Urgent') btns += `<button class="${cls}" onclick="${fn}('${id}','high')">↑ High</button>`;
-  btns += `<button class="${cls} delete-btn" onclick="${fn}('${id}','delete')">🗑 Delete</button>`;
-
-  return btns;
+// ─── ITEM MODAL ──────────────────────────────────────────
+function openItem(item) {
+  document.getElementById('modalTitle').textContent = item.title || '(no title)';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="modal-field"><div class="modal-field-label">Category</div><div class="modal-field-value">${item.category || '—'}</div></div>
+    <div class="modal-field"><div class="modal-field-label">Summary</div><div class="modal-field-value">${item.summary || '—'}</div></div>
+    ${item.action_description ? `<div class="modal-field"><div class="modal-field-label">Action required</div><div class="modal-field-value">${item.action_description}</div></div>` : ''}
+    ${item.due_date ? `<div class="modal-field"><div class="modal-field-label">Due date</div><div class="modal-field-value">${item.due_date}</div></div>` : ''}
+    ${item.sender_name ? `<div class="modal-field"><div class="modal-field-label">From</div><div class="modal-field-value">${item.sender_name}</div></div>` : ''}
+    <div class="modal-field"><div class="modal-field-label">Source / Status / Priority</div><div class="modal-field-value">${item.source || '—'} · ${item.status || 'new'} · ${item.priority || '—'}</div></div>
+    <div class="modal-field"><div class="modal-field-label">Relevance</div><div class="modal-field-value">${item.relevance_score || 0}/10</div></div>
+  `;
+  document.getElementById('modalActions').innerHTML = `
+    <button class="btn-primary" onclick="markDone('${item.id}'); closeModal()">✓ Mark done</button>
+    <button class="btn-secondary" onclick="snoozeItem('${item.id}'); closeModal()">⏸ Snooze</button>
+    <button class="btn-danger" onclick="deleteItem('${item.id}'); closeModal()">Delete</button>
+  `;
+  document.getElementById('modalOverlay').classList.add('open');
 }
 
-async function act(id, action) {
-  if (action === 'delete') {
-    if (!confirm('Delete this item? It will be hidden from the dashboard.')) return;
-    try {
-      await sbSoftDelete(id);
-      allItems = allItems.filter(i => i.id !== id);
-      updateStats();
-      renderItems();
-      toast('🗑 Item deleted');
-    } catch(e) { toast('Error: '+e.message, true); }
-    return;
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('modalOverlay')) {
+    document.getElementById('modalOverlay').classList.remove('open');
   }
+}
+
+// ─── ITEM ACTIONS ────────────────────────────────────────
+async function markDone(id, e) {
+  if (e) e.stopPropagation();
   try {
-    const updates = actionToUpdates(action);
-    await sbPatch(`items?id=eq.${id}`, updates);
-    const item = allItems.find(i=>i.id===id);
-    if (item) Object.assign(item, updates);
-    updateStats();
-    renderItems();
-    toast(actionToast(action));
-  } catch(e) { toast('Error: '+e.message, true); }
+    await supabase(`items?id=eq.${id}`, { method: 'PATCH', body: { status: 'done', completed: true }, prefer: 'return=minimal' });
+    allItems = allItems.filter(i => i.id !== id);
+    updateStats(); renderItems();
+  } catch(err) { alert('Error: ' + err.message); }
 }
 
-async function modalAct(id, action) {
-  if (action === 'delete') {
-    if (!confirm('Delete this item? It will be hidden from the dashboard.')) return;
-    try {
-      await sbSoftDelete(id);
-      allItems = allItems.filter(i => i.id !== id);
-      updateStats();
-      renderItems();
-      closeModal();
-      toast('🗑 Item deleted');
-    } catch(e) { toast('Error: '+e.message, true); }
-    return;
-  }
+async function snoozeItem(id, e) {
+  if (e) e.stopPropagation();
   try {
-    const updates = actionToUpdates(action);
-    await sbPatch(`items?id=eq.${id}`, updates);
-    const item = allItems.find(i=>i.id===id);
-    if (item) Object.assign(item, updates);
-    updateStats();
-    renderItems();
-    openModal(id); // refresh modal
-    toast(actionToast(action));
-  } catch(e) { toast('Error: '+e.message, true); }
+    await supabase(`items?id=eq.${id}`, { method: 'PATCH', body: { status: 'snoozed' }, prefer: 'return=minimal' });
+    allItems = allItems.filter(i => i.id !== id);
+    updateStats(); renderItems();
+  } catch(err) { alert('Error: ' + err.message); }
 }
 
-function actionToUpdates(action) {
-  const map = {
-    done:   { status:'done',    completed:true  },
-    reopen: { status:'new',     completed:false },
-    snooze: { status:'snoozed' },
-    urgent: { priority:'Urgent' },
-    high:   { priority:'High' },
-    normal: { priority:'Normal' },
-  };
-  return map[action] || {};
+async function deleteItem(id, e) {
+  if (e) e.stopPropagation();
+  if (!confirm('Soft-delete this item?')) return;
+  try {
+    await supabase(`items?id=eq.${id}`, { method: 'PATCH', body: { deleted: true }, prefer: 'return=minimal' });
+    allItems = allItems.filter(i => i.id !== id);
+    updateStats(); renderItems();
+  } catch(err) { alert('Error: ' + err.message); }
 }
 
-function actionToast(action) {
-  const map = { done:'✓ Marked as done', reopen:'↩ Reopened', snooze:'💤 Snoozed', urgent:'🚨 Marked urgent', high:'↑ Set to High', normal:'↓ Set to Normal' };
-  return map[action] || 'Updated';
-}
-
-// ── MODAL ─────────────────────────────────────────────────────────────
-function openModal(id) {
-  const item = allItems.find(i=>i.id===id);
-  if (!item) return;
-  currentModalId = id;
-
-  const pri = item.priority||'Normal';
-  const sta = item.status||'new';
-  const src = item.source||'';
-
-  document.getElementById('modal-title').textContent = item.title||'—';
-
-  document.getElementById('modal-badges').innerHTML =
-    `<span class="badge badge-${pri.toLowerCase()}">${pri}</span>` +
-    `<span class="badge badge-${sta}">${sta}</span>` +
-    `<span class="badge badge-${src}">${src||'—'}</span>` +
-    (item.action_required ? `<span class="badge" style="background:rgba(255,122,48,.15);color:#ff9a60;border:1px solid rgba(255,122,48,.3)">Action required</span>` : '');
-
-  const fields = [];
-
-  if (item.summary)
-    fields.push(field('Summary', item.summary, true));
-  if (item.action_required && item.action_description)
-    fields.push(field('Action', item.action_description, true));
-  if (item.raw_content)
-    fields.push(field('Original content', item.raw_content));
-  if (item.relevance_reason)
-    fields.push(field('Why relevant', item.relevance_reason));
-  if (item.due_date)
-    fields.push(field('Due date', item.due_date));
-  if (item.people && item.people.length)
-    fields.push(field('People', Array.isArray(item.people) ? item.people.join(', ') : item.people));
-  if (item.sender_name || item.sender_email)
-    fields.push(field('Sender', [item.sender_name, item.sender_email].filter(Boolean).join(' — ')));
-  if (item.created_at)
-    fields.push(field('Received', new Date(item.created_at).toLocaleString('en-GB')));
-
-  document.getElementById('modal-fields').innerHTML = fields.join('');
-  document.getElementById('modal-actions').innerHTML = buildActionBtns(item, true);
-  document.getElementById('modal-overlay').classList.add('open');
-}
-
-function field(label, value, highlight=false) {
-  return `<div class="modal-section">
-    <div class="modal-section-label">${x(label)}</div>
-    <div class="modal-section-value${highlight?' highlight':''}">${x(String(value||''))}</div>
-  </div>`;
-}
-
-function closeModal() {
-  document.getElementById('modal-overlay').classList.remove('open');
-  currentModalId = null;
-}
-
-function closeModalOnOverlay(e) {
-  if (e.target === document.getElementById('modal-overlay')) closeModal();
-}
-
-document.addEventListener('keydown', e => { if (e.key==='Escape') closeModal(); });
-
-// ── FILTER SETTERS ────────────────────────────────────────────────────
-const filterGroups = {
-  status:   ['sf-all','sf-new','sf-done','sf-snoozed'],
-  priority: ['pf-all','pf-urgent','pf-high','pf-normal'],
-  source:   ['src-all','src-email','src-telegram'],
-};
-
-function setFilter(type, val, btn) {
-  filters[type] = val;
-  filters.actionOnly = false;
-  filterGroups[type].forEach(id => document.getElementById(id)?.classList.remove('active'));
-  btn.classList.add('active');
-  switchTab('items');
-  renderItems();
-}
-
-function setSearch(val) { filters.search=val; renderItems(); }
-
-function quickFilter(type, val) {
-  filters.actionOnly = false;
-  if (type === 'action') {
-    // reset others, set action only
-    filters = { status:'new', priority:'all', source:'all', search:'', actionOnly:true };
-    // reset all filter button visuals
-    Object.values(filterGroups).flat().forEach(id => document.getElementById(id)?.classList.remove('active'));
-    document.getElementById('sf-new')?.classList.add('active');
-    document.getElementById('pf-all')?.classList.add('active');
-    document.getElementById('src-all')?.classList.add('active');
-  } else if (type === 'priority') {
-    filters.priority = val;
-    filterGroups.priority.forEach(id=>document.getElementById(id)?.classList.remove('active'));
-    document.getElementById('pf-'+val.toLowerCase())?.classList.add('active');
-  } else if (type === 'status') {
-    filters.status = val;
-    filterGroups.status.forEach(id=>document.getElementById(id)?.classList.remove('active'));
-    document.getElementById('sf-'+val)?.classList.add('active');
-  }
-  switchTab('items');
-  renderItems();
-}
-
-function clearFilters() {
-  filters = { status:'all', priority:'all', source:'all', search:'', actionOnly:false };
-  document.getElementById('search-input').value = '';
-  Object.values(filterGroups).flat().forEach(id=>document.getElementById(id)?.classList.remove('active'));
-  document.getElementById('sf-all')?.classList.add('active');
-  document.getElementById('pf-all')?.classList.add('active');
-  document.getElementById('src-all')?.classList.add('active');
-  switchTab('items');
-  renderItems();
-}
-
-// ── CONTACTS ──────────────────────────────────────────────────────────
+// ─── CONTACTS ────────────────────────────────────────────
 async function loadContacts() {
   try {
-    const data = await sbGet('contacts?select=*&order=full_name.asc');
-    const el = document.getElementById('contacts-container');
-    if (!data || !data.length) { el.innerHTML='<div class="empty">No contacts yet.</div>'; return; }
-
-    el.innerHTML = `<div class="cards-grid">${data.map(c => {
-      const imp = c.importance ? String(c.importance) : '';
-      const lastContact = c.last_contact_at ? new Date(c.last_contact_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : null;
-      return `<div class="card">
-        <div class="card-name">${x(c.full_name||'—')}</div>
-        <div class="card-meta">
-          ${c.company    ? x(c.company)+'<br>' : ''}
-          ${c.role_title ? x(c.role_title)+'<br>' : ''}
-          ${c.relationship_type ? x(c.relationship_type)+'<br>' : ''}
-          ${c.email_address ? `<span style="color:var(--accent)">${x(c.email_address)}</span><br>` : ''}
-          ${lastContact ? `<span style="color:var(--muted)">Last contact: ${lastContact}</span>` : ''}
-        </div>
-        ${imp ? `<div class="card-tags"><span class="badge badge-${imp.toLowerCase()}">${x(imp)}</span></div>` : ''}
-        ${c.notes ? `<div class="card-notes">${x(c.notes)}</div>` : ''}
-      </div>`;
-    }).join('')}</div>`;
-  } catch(e) {
-    document.getElementById('contacts-container').innerHTML = `<div class="empty">Error loading contacts: ${x(e.message)}</div>`;
-  }
+    const data = await supabase('contacts?select=id,full_name,company,role,importance,email&order=importance.asc,full_name.asc&limit=50');
+    renderContacts(data || []);
+  } catch(e) { document.getElementById('contactsList').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">${e.message}</div></div>`; }
 }
 
-// ── PROJECTS ──────────────────────────────────────────────────────────
+function renderContacts(contacts) {
+  if (!contacts.length) {
+    document.getElementById('contactsList').innerHTML = '<div class="empty-state"><div class="empty-icon">👤</div><div class="empty-text">No contacts found</div></div>';
+    return;
+  }
+  document.getElementById('contactsList').innerHTML = contacts.map((c, i) => {
+    const initials = (c.full_name || '?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    const color = avatarColors[i % avatarColors.length];
+    const imp = c.importance || 'monitor';
+    const impBadge = imp === 'critical' ? 'urgent' : imp === 'high' ? 'high' : 'fyi';
+    return `<div class="contact-card">
+      <div class="contact-header">
+        <div class="contact-avatar" style="background:linear-gradient(135deg,${color}88,${color}44)">${initials}</div>
+        <div>
+          <div class="contact-name">${c.full_name || '—'}</div>
+          <div class="contact-company">${c.company || '—'}</div>
+        </div>
+        <div class="contact-importance"><span class="badge badge-${impBadge}">${imp.toUpperCase()}</span></div>
+      </div>
+      ${c.role ? `<div class="contact-role">${c.role}</div>` : ''}
+      ${c.email ? `<div class="contact-role" style="margin-top:6px;color:var(--accent-blue)">${c.email}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// ─── PROJECTS ────────────────────────────────────────────
 async function loadProjects() {
   try {
-    const data = await sbGet('projects?select=*&order=name.asc');
-    const el = document.getElementById('projects-container');
-    if (!data || !data.length) { el.innerHTML='<div class="empty">No projects yet.</div>'; return; }
-
-    el.innerHTML = `<div class="cards-grid">${data.map(p => {
-      const pri = p.priority ? String(p.priority) : '';
-      return `<div class="card">
-        <div class="card-name">${x(p.name||'—')}</div>
-        <div class="card-meta">
-          ${p.client   ? 'Client: '+x(p.client)+'<br>' : ''}
-          ${p.deadline ? 'Deadline: <span style="color:var(--accent)">'+x(p.deadline)+'</span><br>' : ''}
-          ${p.status   ? 'Status: '+x(p.status) : ''}
-        </div>
-        ${pri ? `<div class="card-tags"><span class="badge badge-${pri.toLowerCase()}">${x(pri)}</span></div>` : ''}
-        ${p.notes ? `<div class="card-notes">${x(p.notes)}</div>` : ''}
-      </div>`;
-    }).join('')}</div>`;
-  } catch(e) {
-    document.getElementById('projects-container').innerHTML = `<div class="empty">Error loading projects: ${x(e.message)}</div>`;
-  }
+    const data = await supabase('projects?select=id,name,client,priority,deadline,notes&order=priority.asc,name.asc&limit=30');
+    renderProjects(data || []);
+  } catch(e) { document.getElementById('projectsList').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">${e.message}</div></div>`; }
 }
 
-// ── ASK ───────────────────────────────────────────────────────────────
-function saveWebhook(v) { try { localStorage.setItem('sb_wh',v); } catch(e){} }
-function loadWebhook()  { try { const v=localStorage.getItem('sb_wh'); if(v) document.getElementById('webhook-url').value=v; } catch(e){} }
+function renderProjects(projects) {
+  if (!projects.length) {
+    document.getElementById('projectsList').innerHTML = '<div class="empty-state"><div class="empty-icon">📁</div><div class="empty-text">No projects found</div></div>';
+    return;
+  }
+  document.getElementById('projectsList').innerHTML = projects.map((p, i) => {
+    const color = avatarColors[i % avatarColors.length];
+    const prio = p.priority || 'medium';
+    const pBadge = prio === 'critical' ? 'urgent' : prio === 'high' ? 'high' : 'medium';
+    return `<div class="project-card">
+      <div class="project-stripe" style="background:${color}"></div>
+      <div class="project-info">
+        <div class="project-name">${p.name || '—'}</div>
+        <div class="project-partner">${p.client || '—'}${p.notes ? ' · ' + p.notes.slice(0,60) + '...' : ''}</div>
+      </div>
+      <span class="badge badge-${pBadge}">${prio.toUpperCase()}</span>
+      <div class="project-deadline">
+        <strong>${p.deadline || '—'}</strong>
+        deadline
+      </div>
+    </div>`;
+  }).join('');
+}
 
-function askQuick(q) { document.getElementById('ask-input').value=q; askBrain(); }
+// ─── ASK ─────────────────────────────────────────────────
+function fillQuestion(el) {
+  document.getElementById('askInput').value = el.textContent;
+  document.getElementById('askInput').focus();
+}
 
-async function askBrain() {
-  const question = document.getElementById('ask-input').value.trim();
-  const webhook  = document.getElementById('webhook-url').value.trim();
-  if (!question) return;
-  if (!webhook) { toast('Paste your Make webhook URL first', true); return; }
-
-  const btn  = document.getElementById('ask-btn');
-  const resp = document.getElementById('ask-response');
-  const txt  = document.getElementById('ask-response-text');
-  btn.disabled=true; btn.textContent='Thinking...';
-  resp.classList.add('visible'); txt.textContent='...';
+async function sendAsk() {
+  const q = document.getElementById('askInput').value.trim();
+  if (!q) return;
+  const btn = document.getElementById('askBtn');
+  const res = document.getElementById('askResponse');
+  btn.disabled = true;
+  res.className = 'ask-response visible';
+  res.innerHTML = `<div class="ask-thinking"><div class="thinking-dots"><span></span><span></span><span></span></div> Searching your brain...</div>`;
 
   try {
-    const r = await fetch(webhook, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ question })
+    const response = await fetch(CONFIG.askWebhook, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: q })
     });
-    txt.textContent = (await r.text()) || '(empty response)';
+    const data = await response.json();
+    const answer = data.answer || data.response || data.text || JSON.stringify(data);
+    res.innerHTML = answer.replace(/\n/g, '<br>');
   } catch(e) {
-    txt.textContent = 'Error reaching webhook: '+e.message;
-  } finally {
-    btn.disabled=false; btn.textContent='Ask →';
+    res.innerHTML = `<span style="color:var(--accent-red)">Error: ${e.message}. Make sure your Ask webhook is configured.</span>`;
   }
+  btn.disabled = false;
 }
 
-// ── TABS ──────────────────────────────────────────────────────────────
-function switchTab(name) {
-  const names = ['items','contacts','projects','ask'];
-  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',names[i]===name));
-  names.forEach(n=>document.getElementById(`panel-${n}`)?.classList.toggle('active',n===name));
+// ─── FILTERS ─────────────────────────────────────────────
+function setPriorityFilter(val, el) {
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  filters.priority = val === 'all' ? null : val;
+  renderItems();
 }
 
-// ── UTILS ─────────────────────────────────────────────────────────────
-function x(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function setSourceFilter(val, el) {
+  el.classList.toggle('active');
+  filters.source = el.classList.contains('active') ? val : null;
+  renderItems();
 }
 
-// ── INIT ──────────────────────────────────────────────────────────────
-updateClock();
-setInterval(updateClock, 30000);
-loadWebhook();
+function setActionFilter(el) {
+  el.classList.toggle('active');
+  filters.action = el.classList.contains('active');
+  renderItems();
+}
+
+function applyFilter(type, val) {
+  switchTab('items', document.querySelector('.nav-item'));
+  if (type === 'priority') {
+    filters.priority = val;
+    document.querySelectorAll('.filter-chip').forEach(c => {
+      c.classList.toggle('active', c.textContent.toLowerCase().includes(val));
+    });
+  }
+  renderItems();
+}
+
+function onSearch() {
+  filters.search = document.getElementById('searchInput').value;
+  renderItems();
+}
+
+// ─── TABS ─────────────────────────────────────────────────
+function switchTab(name, el) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  if (el) el.classList.add('active');
+
+  const titles = { items: 'Priority Feed', contacts: 'Contacts', projects: 'Projects', ask: 'Ask' };
+  document.getElementById('pageTitle').innerHTML = titles[name] + ' <span id="pageSub"></span>';
+}
+
+// ─── MOCK DATA (when no API key) ─────────────────────────
+function loadMockData() {
+  allItems = [
+    { id:'1', title:'Little Nirvana — KU Leuven meeting follow-up', summary:'Action points from the last meeting with Barbara Weyn regarding device prototype testing schedule and investor briefing preparation.', priority:'urgent', status:'new', source:'email', category:'project', relevance_score:9, action_required:true, action_description:'Send updated prototype timeline by Friday', sender_name:'Barbara Weyn', created_at:new Date().toISOString() },
+    { id:'2', title:'IraSME Dossier — German partner update required', summary:'Cornelius Doniga is waiting for supplementary documentation for the subsidy application. Deadline pressure mounting.', priority:'urgent', status:'new', source:'email', category:'admin', relevance_score:10, action_required:true, action_description:'Send requested documents', sender_name:'Cornelius Doniga', created_at:new Date(Date.now()-86400000).toISOString() },
+    { id:'3', title:'Villeroy & Boch Shower — Design brief received', summary:'Initial brief for the new shower design project from Stijn Reynders. Includes technical constraints and target market positioning.', priority:'high', status:'new', source:'email', category:'project', relevance_score:7, action_required:false, sender_name:'Stijn Reynders', created_at:new Date(Date.now()-172800000).toISOString() },
+    { id:'4', title:'Industry on Stage: Antwerpse industrie zet in op elektrificatie', summary:'Detailed overview of industrial electrification projects in the Antwerp harbor area, focusing on large-scale infrastructure investments.', priority:'low', status:'new', source:'email', category:'fyi', relevance_score:3, action_required:false, created_at:new Date(Date.now()-259200000).toISOString() },
+    { id:'5', title:'3/5 Transitie — HR gesprek gepland', summary:'Bevestiging van het gesprek met HR over de herstructurering van het arbeidscontract. Voorbereiding vereist.', priority:'high', status:'new', source:'telegram', category:'admin', relevance_score:8, action_required:true, action_description:'Prepare contract restructuring arguments', created_at:new Date(Date.now()-3600000).toISOString() },
+  ];
+  updateStats(); renderItems();
+
+  renderContacts([
+    { id:'1', full_name:'Barbara Weyn', company:'UZ Leuven', role:'Projectleider Little Nirvana — toekomstig co-founder', importance:'critical' },
+    { id:'2', full_name:'Cornelius Doniga', company:'IraSME Partner (DE)', role:'Co-aanvrager subsidiedossier', importance:'critical' },
+    { id:'3', full_name:'Stijn Reynders', company:'Villeroy & Boch', role:'Klantcontact shower project', importance:'high' },
+    { id:'4', full_name:'Stijn Lowette', company:'Klant', role:'Klantcontact', importance:'high' },
+  ]);
+
+  renderProjects([
+    { id:'1', name:'Little Nirvana', client:'KU Leuven / UZ Leuven', priority:'critical', deadline:'Okt 2026', notes:'Comfort device voor kinderen' },
+    { id:'2', name:'IraSME Dossier', client:'Cornelius Doniga', priority:'critical', deadline:'Sep 2026', notes:'Subsidiedossier' },
+    { id:'3', name:'Villeroy & Boch Shower', client:'Villeroy & Boch', priority:'high', deadline:'TBD', notes:'Nieuw doucheontwerp' },
+    { id:'4', name:'3/5 Transitie', client:'Superellipse', priority:'high', deadline:'Sep 2026', notes:'Herstructurering contract' },
+  ]);
+}
+
+// ─── START ────────────────────────────────────────────────
 loadAll();
 </script>
+
 </body>
 </html>
