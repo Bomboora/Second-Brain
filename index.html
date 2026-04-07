@@ -363,10 +363,6 @@ const CONFIG = {
           </div>
 
           <div class="chat-messages" id="chatMessages">
-            <div class="chat-empty" id="chatEmpty">
-              <div class="chat-empty-icon">✦</div>
-              <div class="chat-empty-text">Stel een vraag aan je Second Brain</div>
-            </div>
           </div>
 
           <div class="chat-thinking" id="chatThinking">
@@ -460,16 +456,12 @@ async function loadChatHistory() {
 
 function renderChat() {
   const container = document.getElementById('chatMessages');
-  const empty = document.getElementById('chatEmpty');
 
   if (chatMessages.length === 0) {
-    container.innerHTML = '';
-    container.appendChild(empty);
-    empty.style.display = 'flex';
+    container.innerHTML = `<div class="chat-empty"><div class="chat-empty-icon">✦</div><div class="chat-empty-text">Stel een vraag aan je Second Brain</div></div>`;
     return;
   }
 
-  empty.style.display = 'none';
   container.innerHTML = chatMessages.map((msg, i) => {
     const timeStr = msg.time ? msg.time.toLocaleTimeString('nl-BE', {hour:'2-digit', minute:'2-digit'}) : '';
     const label = msg.role === 'user' ? 'Jij' : 'Second Brain';
