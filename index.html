@@ -39,6 +39,7 @@ body::before { content:''; position:fixed; inset:0; background:radial-gradient(e
 .nav-item.active { color:var(--text); border-left-color:var(--accent-orange); background:rgba(245,166,35,0.06); }
 .nav-icon { font-size:16px; width:18px; text-align:center; }
 .nav-badge { margin-left:auto; background:rgba(255,77,77,0.15); color:var(--accent-red); font-size:11px; font-weight:600; padding:2px 7px; border-radius:20px; border:1px solid rgba(255,77,77,0.2); }
+.nav-badge.green { background:rgba(61,214,140,0.12); color:var(--accent-green); border-color:rgba(61,214,140,0.2); }
 .sidebar-footer { padding:20px 24px; border-top:1px solid var(--border); }
 .user-pill { display:flex; align-items:center; gap:10px; padding:10px 12px; background:var(--card); border-radius:10px; border:1px solid var(--border); }
 .user-avatar { width:30px; height:30px; border-radius:8px; background:linear-gradient(135deg,var(--accent-orange),var(--accent-purple)); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:white; font-family:'Syne',sans-serif; }
@@ -112,7 +113,7 @@ body::before { content:''; position:fixed; inset:0; background:radial-gradient(e
 .b-high { background:rgba(245,166,35,0.12); color:var(--accent-orange); border:1px solid rgba(245,166,35,0.2); }
 .b-medium { background:rgba(75,158,255,0.12); color:var(--accent-blue); border:1px solid rgba(75,158,255,0.2); }
 .b-low { background:rgba(61,214,140,0.12); color:var(--accent-green); border:1px solid rgba(61,214,140,0.2); }
-.b-fyi,.b-done,.b-snoozed { background:rgba(90,100,120,0.2); color:var(--muted); border:1px solid var(--border); }
+.b-fyi,.b-done,.b-snoozed,.b-normal { background:rgba(90,100,120,0.2); color:var(--muted); border:1px solid var(--border); }
 .b-action { background:rgba(167,139,250,0.12); color:var(--accent-purple); border:1px solid rgba(167,139,250,0.2); }
 .item-title { font-family:'Syne',sans-serif; font-size:15px; font-weight:600; margin-bottom:6px; line-height:1.3; }
 .item-summary { font-size:13px; color:var(--muted); line-height:1.55; margin-bottom:14px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
@@ -155,42 +156,89 @@ body::before { content:''; position:fixed; inset:0; background:radial-gradient(e
 .project-deadline { font-size:12px; color:var(--muted); text-align:right; }
 .project-deadline strong { display:block; color:var(--text); font-size:13px; }
 
-/* ASK — CHAT INTERFACE */
+/* ── TASKS TAB ──────────────────────────────── */
+.tasks-toolbar { display:flex; align-items:center; gap:8px; margin-bottom:24px; flex-wrap:wrap; }
+.task-view-btn { padding:6px 16px; border-radius:20px; font-size:12px; font-weight:500; border:1px solid var(--border); background:transparent; color:var(--muted); cursor:pointer; transition:all 0.15s; font-family:'DM Sans',sans-serif; }
+.task-view-btn:hover { border-color:var(--border-active); color:var(--text); }
+.task-view-btn.active { background:rgba(245,166,35,0.1); border-color:rgba(245,166,35,0.3); color:var(--accent-orange); }
+.new-task-btn { margin-left:auto; display:flex; align-items:center; gap:6px; padding:8px 18px; border-radius:10px; border:1px solid rgba(245,166,35,0.3); background:rgba(245,166,35,0.08); color:var(--accent-orange); font-size:13px; font-weight:600; cursor:pointer; transition:all 0.15s; font-family:'Syne',sans-serif; }
+.new-task-btn:hover { background:rgba(245,166,35,0.15); }
+
+.ctx-group { margin-bottom:28px; }
+.ctx-group-header { display:flex; align-items:center; gap:10px; margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--border); }
+.ctx-group-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.ctx-group-name { font-family:'Syne',sans-serif; font-size:15px; font-weight:700; }
+.ctx-group-count { font-size:12px; color:var(--muted); margin-left:auto; }
+
+.proj-group { margin-bottom:14px; margin-left:0; }
+.proj-group-label { font-size:10px; font-weight:600; letter-spacing:1.2px; text-transform:uppercase; color:var(--muted); margin-bottom:8px; padding-left:4px; }
+
+.task-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:13px 16px; display:flex; align-items:center; gap:12px; margin-bottom:6px; transition:all 0.2s; animation:fadeIn 0.25s ease both; }
+.task-card:hover { border-color:var(--border-active); background:var(--card-hover); }
+.task-card.is-done { opacity:0.4; }
+
+.task-chk { width:18px; height:18px; border-radius:5px; border:1.5px solid var(--subtle); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:11px; cursor:pointer; transition:all 0.15s; }
+.task-chk:hover { border-color:var(--accent-green); }
+.task-chk.checked { background:var(--accent-green); border-color:var(--accent-green); color:#0a0d14; font-weight:700; }
+
+.task-title-text { flex:1; font-size:13px; color:var(--text); line-height:1.4; }
+.task-card.is-done .task-title-text { text-decoration:line-through; color:var(--muted); }
+
+.task-desc { font-size:11px; color:var(--muted); margin-top:2px; }
+
+.task-date-wrap { position:relative; display:flex; align-items:center; flex-shrink:0; }
+.task-date-label { font-size:11px; color:var(--muted); cursor:pointer; padding:3px 9px; border-radius:20px; border:1px solid transparent; white-space:nowrap; transition:border-color 0.15s; }
+.task-date-label:hover { border-color:var(--border-active); }
+.task-date-label.is-overdue { color:var(--accent-red); font-weight:600; }
+.task-date-label.is-today { color:var(--accent-orange); font-weight:600; }
+.task-date-label.is-tomorrow { color:var(--accent-orange); }
+.task-date-label.is-none { color:var(--subtle); font-style:italic; }
+.task-date-input { position:absolute; opacity:0; width:1px; height:1px; pointer-events:none; top:0; left:0; }
+
+.task-prio-badge { padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; cursor:pointer; user-select:none; white-space:nowrap; transition:opacity 0.1s; flex-shrink:0; }
+.task-prio-badge:hover { opacity:0.75; }
+.task-prio-badge:active { transform:scale(0.96); }
+.tp-urgent { background:rgba(255,77,77,0.12); color:#ff7070; border:1px solid rgba(255,77,77,0.2); }
+.tp-high { background:rgba(245,166,35,0.12); color:var(--accent-orange); border:1px solid rgba(245,166,35,0.2); }
+.tp-normal { background:rgba(90,100,120,0.2); color:var(--muted); border:1px solid var(--border); }
+
+/* MODAL FORM FIELDS */
+.modal-input { width:100%; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:9px 12px; color:var(--text); font-size:13px; font-family:'DM Sans',sans-serif; outline:none; margin-top:0; transition:border-color 0.15s; }
+.modal-input:focus { border-color:var(--border-active); }
+.modal-select { width:100%; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:9px 12px; color:var(--text); font-size:13px; font-family:'DM Sans',sans-serif; outline:none; cursor:pointer; transition:border-color 0.15s; }
+.modal-select:focus { border-color:var(--border-active); }
+.modal-textarea { width:100%; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:9px 12px; color:var(--text); font-size:13px; font-family:'DM Sans',sans-serif; outline:none; resize:vertical; min-height:70px; transition:border-color 0.15s; }
+.modal-textarea:focus { border-color:var(--border-active); }
+
+/* ASK */
 .ask-panel { max-width:760px; display:flex; flex-direction:column; height:calc(100vh - 180px); }
 .ask-toolbar { display:flex; align-items:center; gap:10px; margin-bottom:16px; }
 .ask-session-label { font-size:11px; color:var(--muted); flex:1; }
 .ask-session-id { color:var(--subtle); font-family:monospace; font-size:10px; }
 .ask-new-btn { padding:7px 14px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--muted); font-size:12px; font-weight:500; cursor:pointer; transition:all 0.15s; font-family:'DM Sans',sans-serif; display:flex; align-items:center; gap:6px; }
 .ask-new-btn:hover { border-color:rgba(245,166,35,0.3); color:var(--accent-orange); }
-
 .ask-suggestions { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
 .suggestion-chip { padding:8px 14px; border:1px solid var(--border); border-radius:20px; font-size:12px; color:var(--muted); cursor:pointer; transition:all 0.15s; font-family:'DM Sans',sans-serif; }
 .suggestion-chip:hover { border-color:rgba(245,166,35,0.3); color:var(--accent-orange); }
-
 .chat-messages { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:12px; padding:4px 0; margin-bottom:16px; min-height:0; }
 .chat-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; flex:1; color:var(--muted); gap:8px; padding:40px; }
 .chat-empty-icon { font-size:32px; opacity:0.3; }
 .chat-empty-text { font-size:13px; }
-
 .chat-msg { max-width:85%; padding:14px 18px; border-radius:14px; font-size:14px; line-height:1.65; animation:msgIn 0.25s ease both; }
 @keyframes msgIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
 .chat-msg.user { align-self:flex-end; background:rgba(245,166,35,0.12); border:1px solid rgba(245,166,35,0.2); color:var(--text); border-bottom-right-radius:4px; }
 .chat-msg.assistant { align-self:flex-start; background:var(--card); border:1px solid var(--border); color:var(--text); border-bottom-left-radius:4px; }
-.chat-msg.assistant .chat-msg-label,
-.chat-msg.user .chat-msg-label { font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; margin-bottom:6px; }
+.chat-msg.assistant .chat-msg-label,.chat-msg.user .chat-msg-label { font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; margin-bottom:6px; }
 .chat-msg.user .chat-msg-label { color:var(--accent-orange); }
 .chat-msg.assistant .chat-msg-label { color:var(--accent-blue); }
 .chat-msg-time { font-size:10px; color:var(--subtle); margin-top:8px; text-align:right; }
-
 .chat-thinking { align-self:flex-start; background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px 18px; border-bottom-left-radius:4px; display:none; }
 .chat-thinking.visible { display:block; }
-
 .thinking-dots { display:flex; gap:4px; align-items:center; }
 .thinking-dots span { width:6px; height:6px; border-radius:50%; background:var(--accent-orange); animation:dot 1.4s infinite ease-in-out; }
 .thinking-dots span:nth-child(2) { animation-delay:0.2s; }
 .thinking-dots span:nth-child(3) { animation-delay:0.4s; }
 @keyframes dot { 0%,80%,100%{transform:scale(0.7);opacity:0.4} 40%{transform:scale(1);opacity:1} }
-
 .ask-input-wrap { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:4px 4px 4px 20px; display:flex; align-items:center; gap:10px; transition:border-color 0.2s; flex-shrink:0; }
 .ask-input-wrap:focus-within { border-color:rgba(245,166,35,0.4); }
 .ask-input { flex:1; background:none; border:none; outline:none; color:var(--text); font-size:14px; font-family:'DM Sans',sans-serif; padding:14px 0; }
@@ -257,6 +305,7 @@ const CONFIG = {
     <nav class="nav">
       <div class="nav-section">Capture</div>
       <div class="nav-item active" onclick="switchTab('items',this)"><span class="nav-icon">⚡</span>Items<span class="nav-badge" id="urgentBadge">—</span></div>
+      <div class="nav-item" onclick="switchTab('tasks',this)"><span class="nav-icon">☑</span>Tasks<span class="nav-badge green" id="tasksBadge">—</span></div>
       <div class="nav-item" onclick="switchTab('contacts',this)"><span class="nav-icon">👤</span>Contacts</div>
       <div class="nav-item" onclick="switchTab('projects',this)"><span class="nav-icon">📁</span>Projects</div>
       <div class="nav-section" style="margin-top:12px">Intelligence</div>
@@ -288,7 +337,6 @@ const CONFIG = {
       <div class="tab-content active" id="tab-items">
         <div class="insight-label">Status Overview</div>
         <div class="insight-title">Curator Insight</div>
-
         <div class="stats-grid">
           <div class="stat-card s-urgent" onclick="setPriFilter('urgent',null)">
             <div class="stat-label">Urgent</div>
@@ -307,12 +355,10 @@ const CONFIG = {
             <div class="stat-row"><div class="stat-number" id="sRecent">—</div><div class="stat-icon">◷</div></div>
           </div>
         </div>
-
         <div class="section-header">
           <div class="section-title">Priority Feed</div>
           <span class="section-count" id="itemCount"></span>
         </div>
-
         <div class="filter-bar">
           <button class="filter-chip active" id="fAll"    onclick="setPriFilter('all',this)">All</button>
           <button class="filter-chip"        id="fUrgent" onclick="setPriFilter('urgent',this)">🔴 Urgent</button>
@@ -324,9 +370,24 @@ const CONFIG = {
           <div class="filter-sep"></div>
           <button class="filter-chip" id="fAction" onclick="setActFilter(this)">Action required</button>
         </div>
-
         <div class="items-list" id="itemsList">
           <div class="loading-state"><div class="spinner"></div>Loading items...</div>
+        </div>
+      </div>
+
+      <!-- TASKS TAB -->
+      <div class="tab-content" id="tab-tasks">
+        <div class="insight-label">Actielijst</div>
+        <div class="insight-title">Tasks</div>
+
+        <div class="tasks-toolbar">
+          <button class="task-view-btn active" id="tvAll" onclick="setTaskView('all',this)">Alle taken</button>
+          <button class="task-view-btn" id="tvWeek" onclick="setTaskView('week',this)">Deze week</button>
+          <button class="new-task-btn" onclick="openNewTaskModal()">+ Nieuwe taak</button>
+        </div>
+
+        <div id="tasksList">
+          <div class="loading-state"><div class="spinner"></div>Taken laden...</div>
         </div>
       </div>
 
@@ -349,31 +410,24 @@ const CONFIG = {
         <div class="insight-label">Intelligence Layer</div>
         <div class="insight-title">Ask Second Brain</div>
         <div class="ask-panel">
-
           <div class="ask-toolbar">
             <div class="ask-session-label">Session: <span class="ask-session-id" id="sessionDisplay"></span></div>
             <button class="ask-new-btn" onclick="newChatSession()">✦ Nieuw gesprek</button>
           </div>
-
           <div class="ask-suggestions" id="askSuggestions">
             <div class="suggestion-chip" onclick="fillQ(this)">Wat zijn mijn open taken deze week?</div>
             <div class="suggestion-chip" onclick="fillQ(this)">Wat is de status van Little Nirvana?</div>
             <div class="suggestion-chip" onclick="fillQ(this)">Wat vraagt mijn aandacht vandaag?</div>
             <div class="suggestion-chip" onclick="fillQ(this)">Vat recent contact met Barbara Weyn samen</div>
           </div>
-
-          <div class="chat-messages" id="chatMessages">
-          </div>
-
+          <div class="chat-messages" id="chatMessages"></div>
           <div class="chat-thinking" id="chatThinking">
             <div class="thinking-dots"><span></span><span></span><span></span></div>
           </div>
-
           <div class="ask-input-wrap">
             <input class="ask-input" id="askInput" placeholder="Stel een vraag..." onkeydown="if(event.key==='Enter'&&!event.shiftKey)sendAsk()">
             <button class="ask-btn" id="askBtn" onclick="sendAsk()">Ask →</button>
           </div>
-
         </div>
       </div>
 
@@ -384,104 +438,85 @@ const CONFIG = {
 <script>
 // ── STATE ──────────────────────────────────────
 let allItems = [];
+let allTasks = [];
+let taskWeekOnly = false;
 let F = { priority: null, source: null, action: false, search: '' };
 const COLORS = ['#f5a623','#4b9eff','#a78bfa','#3dd68c','#ff6b6b','#f093fb'];
+
+const CTX_ORDER  = ['superellipse','little_nirvana','quantum_design','prive','algemeen'];
+const CTX_LABELS = { superellipse:'Superellipse', little_nirvana:'Little Nirvana', quantum_design:'Quantum Design', prive:'Privé', algemeen:'Algemeen' };
+const CTX_COLORS = { superellipse:'#4b9eff', little_nirvana:'#3dd68c', quantum_design:'#a78bfa', prive:'#f5a623', algemeen:'#5a6478' };
+const PRIO_CYCLE = ['urgent','high','normal'];
+const PRIO_LABELS = { urgent:'Urgent', high:'High', normal:'Normal' };
+const MONTHS = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
 
 // ── CHAT STATE ─────────────────────────────────
 let chatSessionId = null;
 let chatMessages = [];
 let chatLastActivity = null;
-const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes
+const SESSION_TIMEOUT = 30 * 60 * 1000;
 
-function generateSessionId() {
-  return 'dash_' + crypto.randomUUID().split('-')[0] + '_' + Date.now().toString(36);
-}
+function generateSessionId() { return 'dash_' + crypto.randomUUID().split('-')[0] + '_' + Date.now().toString(36); }
 
 function initChatSession() {
-  // Check for existing session
   const stored = sessionStorage.getItem('sb_chat_session');
   const storedTime = sessionStorage.getItem('sb_chat_time');
   if (stored && storedTime && (Date.now() - parseInt(storedTime)) < SESSION_TIMEOUT) {
-    chatSessionId = stored;
-    chatLastActivity = parseInt(storedTime);
-    loadChatHistory();
-  } else {
-    newChatSession();
-  }
+    chatSessionId = stored; chatLastActivity = parseInt(storedTime); loadChatHistory();
+  } else { newChatSession(); }
   updateSessionDisplay();
 }
 
 function newChatSession() {
-  chatSessionId = generateSessionId();
-  chatMessages = [];
-  chatLastActivity = Date.now();
+  chatSessionId = generateSessionId(); chatMessages = []; chatLastActivity = Date.now();
   sessionStorage.setItem('sb_chat_session', chatSessionId);
   sessionStorage.setItem('sb_chat_time', chatLastActivity.toString());
-  updateSessionDisplay();
-  renderChat();
-  // Show suggestions again
+  updateSessionDisplay(); renderChat();
   document.getElementById('askSuggestions').style.display = 'flex';
 }
 
 function updateSessionDisplay() {
-  document.getElementById('sessionDisplay').textContent = chatSessionId ? chatSessionId.slice(0, 16) + '...' : '—';
+  document.getElementById('sessionDisplay').textContent = chatSessionId ? chatSessionId.slice(0,16) + '...' : '—';
 }
 
 function touchSession() {
   chatLastActivity = Date.now();
   sessionStorage.setItem('sb_chat_time', chatLastActivity.toString());
-  // Check timeout
-  if (chatLastActivity && (Date.now() - chatLastActivity) > SESSION_TIMEOUT) {
-    newChatSession();
-  }
+  if ((Date.now() - chatLastActivity) > SESSION_TIMEOUT) newChatSession();
 }
 
 async function loadChatHistory() {
   try {
-    const data = await sb(
-      `conversations?session_id=eq.${chatSessionId}&select=role,content,created_at&order=created_at.asc&limit=50`
-    );
+    const data = await sb(`conversations?session_id=eq.${chatSessionId}&select=role,content,created_at&order=created_at.asc&limit=50`);
     if (data && data.length > 0) {
-      chatMessages = data.map(m => ({
-        role: m.role,
-        content: m.content,
-        time: new Date(m.created_at)
-      }));
+      chatMessages = data.map(m => ({ role:m.role, content:m.content, time:new Date(m.created_at) }));
       renderChat();
     }
-  } catch(e) {
-    console.error('Failed to load chat history:', e);
-  }
+  } catch(e) { console.error('Failed to load chat history:', e); }
 }
 
 function renderChat() {
   const container = document.getElementById('chatMessages');
-
   if (chatMessages.length === 0) {
     container.innerHTML = `<div class="chat-empty"><div class="chat-empty-icon">✦</div><div class="chat-empty-text">Stel een vraag aan je Second Brain</div></div>`;
     return;
   }
-
-  container.innerHTML = chatMessages.map((msg, i) => {
-    const timeStr = msg.time ? msg.time.toLocaleTimeString('nl-BE', {hour:'2-digit', minute:'2-digit'}) : '';
+  container.innerHTML = chatMessages.map((msg,i) => {
+    const timeStr = msg.time ? msg.time.toLocaleTimeString('nl-BE',{hour:'2-digit',minute:'2-digit'}) : '';
     const label = msg.role === 'user' ? 'Jij' : 'Second Brain';
     const formatted = msg.role === 'assistant'
-      ? msg.content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>')
+      ? msg.content.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')
       : escHtml(msg.content);
-    return `<div class="chat-msg ${msg.role}" style="animation-delay:${Math.min(i * 30, 200)}ms">
+    return `<div class="chat-msg ${msg.role}" style="animation-delay:${Math.min(i*30,200)}ms">
       <div class="chat-msg-label">${label}</div>
       <div>${formatted}</div>
       ${timeStr ? `<div class="chat-msg-time">${timeStr}</div>` : ''}
     </div>`;
   }).join('');
-
-  // Scroll to bottom
   container.scrollTop = container.scrollHeight;
 }
 
-function escHtml(s) {
-  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
+function escHtml(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 // ── SUPABASE ────────────────────────────────────
 async function sb(path, opts = {}) {
@@ -504,7 +539,7 @@ async function sb(path, opts = {}) {
 async function loadAll() {
   const hasKey = CONFIG.supabaseKey && !CONFIG.supabaseKey.startsWith('JOUW_');
   if (!hasKey) { loadMockData(); return; }
-  await Promise.all([loadItems(), loadContacts(), loadProjects()]);
+  await Promise.all([loadItems(), loadTasks(), loadContacts(), loadProjects()]);
   initChatSession();
 }
 
@@ -519,8 +554,7 @@ async function loadItems() {
       '&order=relevance_score.desc.nullslast,created_at.desc&limit=150'
     );
     allItems = data || [];
-    updateStats();
-    renderItems();
+    updateStats(); renderItems();
   } catch(e) {
     document.getElementById('itemsList').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><div style="font-size:13px">${e.message}</div></div>`;
   }
@@ -555,19 +589,17 @@ function barColor(score) {
   return '#3a4255';
 }
 
-function esc(s) {
-  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/`/g,"'").replace(/\$/g,'&#36;');
-}
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/`/g,"'").replace(/\$/g,'&#36;'); }
 
 function renderItems() {
   const items = filtered();
   document.getElementById('itemCount').textContent = `Showing ${items.length} active items`;
-  document.getElementById('pageSub').textContent = `${allItems.length} total`;
+  document.getElementById('pageSub').textContent = allItems.length + ' total';
   if (!items.length) {
-    document.getElementById('itemsList').innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">Geen items gevonden</div></div>';
+    document.getElementById('itemsList').innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><div>Geen items gevonden</div></div>';
     return;
   }
-  document.getElementById('itemsList').innerHTML = items.map((item, i) => {
+  document.getElementById('itemsList').innerHTML = items.map((item,i) => {
     const score = item.relevance_score || 0;
     const bc = barColor(score);
     const date = new Date(item.received_at || item.created_at).toLocaleDateString('nl-BE',{day:'numeric',month:'short'});
@@ -604,7 +636,7 @@ function renderItems() {
   window._renderedItems = items;
 }
 
-// ── MODAL ────────────────────────────────────────
+// ── MODAL (items) ─────────────────────────────────
 function openModal(idx) {
   const item = window._renderedItems[idx];
   document.getElementById('modalTitle').textContent = item.title || '(geen titel)';
@@ -639,6 +671,316 @@ async function del(id) {
 }
 function removeItem(id) { allItems = allItems.filter(i => i.id !== id); updateStats(); renderItems(); }
 
+// ── TASKS ────────────────────────────────────────
+async function loadTasks() {
+  document.getElementById('tasksList').innerHTML = '<div class="loading-state"><div class="spinner"></div>Taken laden...</div>';
+  try {
+    const data = await sb(
+      'items?deleted=is.false&category=eq.Task' +
+      '&or=(status.is.null,status.not.in.(done,snoozed))' +
+      '&select=id,title,action_description,priority,due_date,context,project_name,status,created_at' +
+      '&order=due_date.asc.nullslast,created_at.desc&limit=200'
+    );
+    allTasks = data || [];
+    updateTasksBadge();
+    renderTasks();
+  } catch(e) {
+    // Fallback: project_name column may not exist yet — retry without it
+    try {
+      const data = await sb(
+        'items?deleted=is.false&category=eq.Task' +
+        '&or=(status.is.null,status.not.in.(done,snoozed))' +
+        '&select=id,title,action_description,priority,due_date,context,status,created_at' +
+        '&order=due_date.asc.nullslast,created_at.desc&limit=200'
+      );
+      allTasks = (data || []).map(t => ({...t, project_name: null}));
+      updateTasksBadge();
+      renderTasks();
+    } catch(e2) {
+      document.getElementById('tasksList').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><div style="font-size:13px">${e2.message}</div></div>`;
+    }
+  }
+}
+
+function updateTasksBadge() {
+  const n = allTasks.length;
+  document.getElementById('tasksBadge').textContent = n || '—';
+}
+
+function todayStr() {
+  const d = new Date();
+  return d.toISOString().split('T')[0];
+}
+
+function endOfWeekStr() {
+  const d = new Date();
+  const day = d.getDay(); // 0=Sun
+  const diff = day === 0 ? 6 : 7 - day; // days until Sunday
+  d.setDate(d.getDate() + diff);
+  return d.toISOString().split('T')[0];
+}
+
+function formatTaskDate(due) {
+  if (!due) return { label:'+ datum', cls:'is-none' };
+  const today = todayStr();
+  const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
+  const tomorrowStr = tomorrow.toISOString().split('T')[0];
+  if (due < today) return { label: fmtDate(due), cls:'is-overdue' };
+  if (due === today) return { label:'Vandaag', cls:'is-today' };
+  if (due === tomorrowStr) return { label:'Morgen', cls:'is-tomorrow' };
+  return { label: fmtDate(due), cls:'' };
+}
+
+function fmtDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso + 'T00:00:00');
+  return d.getDate() + ' ' + MONTHS[d.getMonth()];
+}
+
+function renderTasks() {
+  const today = todayStr();
+  const eow = endOfWeekStr();
+
+  let tasks = allTasks;
+  if (taskWeekOnly) {
+    tasks = tasks.filter(t => t.due_date && t.due_date >= today && t.due_date <= eow);
+  }
+
+  if (!tasks.length) {
+    document.getElementById('tasksList').innerHTML = `<div class="empty-state"><div class="empty-icon">☑</div><div>${taskWeekOnly ? 'Geen taken deze week' : 'Geen open taken'}</div></div>`;
+    return;
+  }
+
+  // Group by context
+  const groups = {};
+  tasks.forEach(t => {
+    const ctx = (t.context || 'algemeen').toLowerCase();
+    if (!groups[ctx]) groups[ctx] = {};
+    const proj = t.project_name || 'Geen project';
+    if (!groups[ctx][proj]) groups[ctx][proj] = [];
+    groups[ctx][proj].push(t);
+  });
+
+  // Render in fixed context order
+  const ctxKeys = [...CTX_ORDER.filter(c => groups[c]), ...Object.keys(groups).filter(c => !CTX_ORDER.includes(c))];
+
+  let html = '';
+  ctxKeys.forEach(ctx => {
+    const projMap = groups[ctx];
+    const totalInCtx = Object.values(projMap).reduce((s,arr) => s+arr.length, 0);
+    const dot = CTX_COLORS[ctx] || '#5a6478';
+    const label = CTX_LABELS[ctx] || ctx;
+
+    html += `<div class="ctx-group">
+      <div class="ctx-group-header">
+        <div class="ctx-group-dot" style="background:${dot}"></div>
+        <div class="ctx-group-name">${label}</div>
+        <div class="ctx-group-count">${totalInCtx} ${totalInCtx === 1 ? 'taak' : 'taken'}</div>
+      </div>`;
+
+    Object.entries(projMap).forEach(([proj, taskList]) => {
+      html += `<div class="proj-group">
+        <div class="proj-group-label">${esc(proj)}</div>`;
+      taskList.forEach(t => {
+        const { label: dateLabel, cls: dateCls } = formatTaskDate(t.due_date);
+        const prio = (t.priority || 'normal').toLowerCase();
+        const prioClass = PRIO_CYCLE.includes(prio) ? `tp-${prio}` : 'tp-normal';
+        const prioLabel = PRIO_LABELS[prio] || prio;
+        html += `<div class="task-card" id="tc-${t.id}">
+          <div class="task-chk" onclick="markTaskDone('${t.id}')"></div>
+          <div style="flex:1;min-width:0">
+            <div class="task-title-text">${esc(t.title) || '(geen titel)'}</div>
+            ${t.action_description ? `<div class="task-desc">${esc(t.action_description)}</div>` : ''}
+          </div>
+          <div class="task-date-wrap">
+            <span class="task-date-label ${dateCls}" onclick="openTaskDate('${t.id}')">${dateLabel}</span>
+            <input class="task-date-input" id="tdi-${t.id}" type="date" value="${t.due_date||''}" onchange="saveTaskDeadline('${t.id}',this.value)" onblur="closeTaskDate('${t.id}')">
+          </div>
+          <span class="task-prio-badge ${prioClass}" id="tpb-${t.id}" onclick="cycleTaskPrio('${t.id}')">${prioLabel}</span>
+        </div>`;
+      });
+      html += '</div>';
+    });
+    html += '</div>';
+  });
+
+  document.getElementById('tasksList').innerHTML = html;
+}
+
+// ── TASK INTERACTIONS ─────────────────────────────
+async function markTaskDone(id) {
+  const card = document.getElementById('tc-'+id);
+  if (card) { card.classList.add('is-done'); card.querySelector('.task-chk').classList.add('checked'); card.querySelector('.task-chk').textContent = '✓'; }
+  try {
+    await sb(`items?id=eq.${id}`, {method:'PATCH', body:{status:'done', completed:true}, prefer:'return=minimal'});
+    allTasks = allTasks.filter(t => t.id !== id);
+    updateTasksBadge();
+    setTimeout(() => renderTasks(), 600);
+  } catch(e) {
+    if (card) { card.classList.remove('is-done'); card.querySelector('.task-chk').classList.remove('checked'); card.querySelector('.task-chk').textContent = ''; }
+    alert(e.message);
+  }
+}
+
+async function cycleTaskPrio(id) {
+  const badge = document.getElementById('tpb-'+id);
+  if (!badge) return;
+  const cur = PRIO_CYCLE.find(p => badge.classList.contains('tp-'+p)) || 'normal';
+  const next = PRIO_CYCLE[(PRIO_CYCLE.indexOf(cur)+1) % PRIO_CYCLE.length];
+  PRIO_CYCLE.forEach(p => badge.classList.remove('tp-'+p));
+  badge.classList.add('tp-'+next);
+  badge.textContent = PRIO_LABELS[next];
+  // Update local state
+  const task = allTasks.find(t => t.id === id);
+  if (task) task.priority = next;
+  try {
+    await sb(`items?id=eq.${id}`, {method:'PATCH', body:{priority: next.charAt(0).toUpperCase()+next.slice(1)}, prefer:'return=minimal'});
+  } catch(e) {
+    console.error('Prioriteit opslaan mislukt:', e.message);
+  }
+}
+
+function openTaskDate(id) {
+  const inp = document.getElementById('tdi-'+id);
+  if (!inp) return;
+  inp.style.position = 'absolute';
+  inp.style.opacity = '1';
+  inp.style.width = '150px';
+  inp.style.height = '34px';
+  inp.style.pointerEvents = 'auto';
+  inp.style.zIndex = '20';
+  inp.style.top = '0';
+  inp.style.left = '0';
+  inp.style.background = 'var(--surface)';
+  inp.style.border = '1px solid var(--border-active)';
+  inp.style.borderRadius = '8px';
+  inp.style.padding = '0 8px';
+  inp.style.color = 'var(--text)';
+  inp.style.fontSize = '12px';
+  inp.focus();
+  try { inp.showPicker && inp.showPicker(); } catch(e) {}
+}
+
+function closeTaskDate(id) {
+  const inp = document.getElementById('tdi-'+id);
+  if (!inp) return;
+  inp.style.opacity = '0';
+  inp.style.pointerEvents = 'none';
+  inp.style.width = '1px';
+  inp.style.height = '1px';
+}
+
+async function saveTaskDeadline(id, value) {
+  closeTaskDate(id);
+  // Update date label
+  const label = document.querySelector(`#tc-${id} .task-date-label`);
+  if (label) {
+    const { label: dl, cls } = formatTaskDate(value || null);
+    label.textContent = dl;
+    label.className = 'task-date-label' + (cls ? ' '+cls : '');
+  }
+  // Update local state
+  const task = allTasks.find(t => t.id === id);
+  if (task) task.due_date = value || null;
+  try {
+    await sb(`items?id=eq.${id}`, {method:'PATCH', body:{due_date: value || null}, prefer:'return=minimal'});
+  } catch(e) {
+    console.error('Deadline opslaan mislukt:', e.message);
+  }
+}
+
+// ── NEW TASK MODAL ────────────────────────────────
+function openNewTaskModal() {
+  document.getElementById('modalTitle').textContent = 'Nieuwe taak aanmaken';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="modal-field">
+      <div class="modal-field-label">Titel *</div>
+      <input class="modal-input" id="ntTitle" type="text" placeholder="Wat moet er gedaan worden?" autofocus>
+    </div>
+    <div class="modal-field">
+      <div class="modal-field-label">Context *</div>
+      <select class="modal-select" id="ntContext">
+        <option value="superellipse">Superellipse</option>
+        <option value="little_nirvana">Little Nirvana</option>
+        <option value="quantum_design">Quantum Design</option>
+        <option value="prive">Privé</option>
+        <option value="algemeen">Algemeen</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <div class="modal-field-label">Project</div>
+      <input class="modal-input" id="ntProject" type="text" placeholder="Projectnaam (optioneel)">
+    </div>
+    <div class="modal-field">
+      <div class="modal-field-label">Prioriteit</div>
+      <select class="modal-select" id="ntPriority">
+        <option value="Normal" selected>Normal</option>
+        <option value="High">High</option>
+        <option value="Urgent">Urgent</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <div class="modal-field-label">Deadline</div>
+      <input class="modal-input" id="ntDeadline" type="date">
+    </div>
+    <div class="modal-field">
+      <div class="modal-field-label">Omschrijving</div>
+      <textarea class="modal-textarea" id="ntDesc" placeholder="Extra toelichting (optioneel)"></textarea>
+    </div>
+  `;
+  document.getElementById('modalActions').innerHTML = `
+    <button class="btn-primary" onclick="createTask()">+ Aanmaken</button>
+    <button class="btn-secondary" onclick="closeModal()">Annuleren</button>
+  `;
+  document.getElementById('modalOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('ntTitle')?.focus(), 100);
+}
+
+async function createTask() {
+  const title   = document.getElementById('ntTitle')?.value?.trim();
+  const context = document.getElementById('ntContext')?.value;
+  const project = document.getElementById('ntProject')?.value?.trim() || null;
+  const priority = document.getElementById('ntPriority')?.value;
+  const deadline = document.getElementById('ntDeadline')?.value || null;
+  const desc    = document.getElementById('ntDesc')?.value?.trim() || null;
+
+  if (!title) { alert('Titel is verplicht.'); return; }
+
+  const payload = {
+    title,
+    category: 'Task',
+    action_required: true,
+    action_description: desc,
+    priority,
+    due_date: deadline,
+    context,
+    project_name: project,
+    source: 'dashboard',
+    status: 'open',
+    deleted: false
+  };
+
+  try {
+    const result = await sb('items', {method:'POST', body:payload, prefer:'return=representation'});
+    closeModal();
+    // Add to local state and re-render
+    if (result && result[0]) allTasks.push({...result[0], project_name: project});
+    else allTasks.push({id: crypto.randomUUID(), ...payload});
+    updateTasksBadge();
+    renderTasks();
+  } catch(e) {
+    alert('Aanmaken mislukt: ' + e.message);
+  }
+}
+
+// ── TASKS VIEW TOGGLE ────────────────────────────
+function setTaskView(view, el) {
+  taskWeekOnly = view === 'week';
+  document.querySelectorAll('.task-view-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderTasks();
+}
+
 // ── CONTACTS ─────────────────────────────────────
 async function loadContacts() {
   try {
@@ -656,7 +998,9 @@ async function loadContacts() {
           <div><div class="contact-name">${c.full_name||'—'}</div><div class="contact-company">${c.company||'—'}</div></div>
           <span class="badge ${bc}" style="margin-left:auto">${imp.toUpperCase()}</span>
         </div>
-        ${c.email_address?`<div class="contact-role" style="color:var(--accent-blue);margin-top:4px">${c.email_address}</div>`:''}${c.role_title?`<div class="contact-role">${c.role_title}</div>`:''}${c.last_contact_at?`<div class="contact-role" style="margin-top:4px">Last contact: ${new Date(c.last_contact_at).toLocaleDateString('nl-BE',{day:'numeric',month:'short',year:'numeric'})}</div>`:''}
+        ${c.email_address?`<div class="contact-role" style="color:var(--accent-blue);margin-top:4px">${c.email_address}</div>`:''}
+        ${c.role_title?`<div class="contact-role">${c.role_title}</div>`:''}
+        ${c.last_contact_at?`<div class="contact-role" style="margin-top:4px">Last contact: ${new Date(c.last_contact_at).toLocaleDateString('nl-BE',{day:'numeric',month:'short',year:'numeric'})}</div>`:''}
       </div>`;
     }).join('');
   } catch(e) { document.getElementById('contactsList').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><div>${e.message}</div></div>`; }
@@ -676,7 +1020,8 @@ async function loadProjects() {
         <div class="project-stripe" style="background:${col}"></div>
         <div class="project-info">
           <div class="project-name">${p.name||'—'}</div>
-          <div class="project-partner">${p.client_org||''}</div>${p.my_role?`<div class="project-partner" style="color:var(--accent-blue)">${p.my_role}</div>`:''}
+          <div class="project-partner">${p.client_org||''}</div>
+          ${p.my_role?`<div class="project-partner" style="color:var(--accent-blue)">${p.my_role}</div>`:''}
         </div>
         <span class="badge ${bc}">${prio.toUpperCase()}</span>
         <div class="project-deadline"><strong>${p.deadline||'—'}</strong>deadline</div>
@@ -685,60 +1030,37 @@ async function loadProjects() {
   } catch(e) { document.getElementById('projectsList').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><div>${e.message}</div></div>`; }
 }
 
-// ── ASK — CONVERSATIONAL ─────────────────────────
+// ── ASK ───────────────────────────────────────────
 function fillQ(el) { document.getElementById('askInput').value = el.textContent; }
 
 async function sendAsk() {
   const q = document.getElementById('askInput').value.trim();
   if (!q) return;
-
   touchSession();
-
-  // Hide suggestions after first message
   document.getElementById('askSuggestions').style.display = 'none';
-
-  // Add user message
-  chatMessages.push({ role: 'user', content: q, time: new Date() });
+  chatMessages.push({ role:'user', content:q, time:new Date() });
   renderChat();
   document.getElementById('askInput').value = '';
-
-  // Show thinking
   const btn = document.getElementById('askBtn');
   const thinking = document.getElementById('chatThinking');
-  btn.disabled = true;
-  thinking.classList.add('visible');
-
-  // Scroll to bottom
+  btn.disabled = true; thinking.classList.add('visible');
   const container = document.getElementById('chatMessages');
   container.scrollTop = container.scrollHeight;
-
   try {
     const response = await fetch(CONFIG.askWebhook, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question: q, session_id: chatSessionId })
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ question:q, session_id:chatSessionId })
     });
-
     const raw = await response.text();
     let answer;
-    try {
-      const json = JSON.parse(raw);
-      answer = json.answer || json.response || json.text || raw;
-    } catch {
-      answer = raw;
-    }
-
-    // Add assistant message
-    chatMessages.push({ role: 'assistant', content: answer, time: new Date() });
+    try { const json = JSON.parse(raw); answer = json.answer || json.response || json.text || raw; } catch { answer = raw; }
+    chatMessages.push({ role:'assistant', content:answer, time:new Date() });
     renderChat();
-
   } catch(e) {
-    chatMessages.push({ role: 'assistant', content: 'Fout: ' + e.message, time: new Date() });
+    chatMessages.push({ role:'assistant', content:'Fout: ' + e.message, time:new Date() });
     renderChat();
   }
-
-  thinking.classList.remove('visible');
-  btn.disabled = false;
+  thinking.classList.remove('visible'); btn.disabled = false;
   document.getElementById('askInput').focus();
 }
 
@@ -746,14 +1068,10 @@ async function sendAsk() {
 function setPriFilter(val, el) {
   ['fAll','fUrgent','fHigh','fMedium'].forEach(id => document.getElementById(id)?.classList.remove('active'));
   if (el) el.classList.add('active');
-  else {
-    const map = {urgent:'fUrgent',high:'fHigh',medium:'fMedium',all:'fAll'};
-    document.getElementById(map[val])?.classList.add('active');
-  }
+  else { const map={urgent:'fUrgent',high:'fHigh',medium:'fMedium',all:'fAll'}; document.getElementById(map[val])?.classList.add('active'); }
   F.priority = val === 'all' ? null : val;
   renderItems();
 }
-
 function setSrcFilter(val, el) {
   el.classList.toggle('active');
   F.source = el.classList.contains('active') ? val : null;
@@ -761,14 +1079,10 @@ function setSrcFilter(val, el) {
   if (!el.classList.contains('active')) F.source = null;
   renderItems();
 }
-
 function setActFilter(el) {
   const btn = el || document.getElementById('fAction');
-  btn.classList.toggle('active');
-  F.action = btn.classList.contains('active');
-  renderItems();
+  btn.classList.toggle('active'); F.action = btn.classList.contains('active'); renderItems();
 }
-
 function onSearch() { F.search = document.getElementById('searchInput').value; renderItems(); }
 
 // ── TABS ──────────────────────────────────────────
@@ -777,13 +1091,13 @@ function switchTab(name, el) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
   if (el) el.classList.add('active');
-  const titles = {items:'Priority Feed',contacts:'Contacts',projects:'Projects',ask:'Ask'};
+  const titles = {items:'Priority Feed', tasks:'Tasks', contacts:'Contacts', projects:'Projects', ask:'Ask'};
   document.getElementById('pageTitle').innerHTML = titles[name] + ' <span class="topbar-sub" id="pageSub"></span>';
   if (name === 'items') document.getElementById('pageSub').textContent = allItems.length + ' total';
+  if (name === 'tasks') document.getElementById('pageSub').textContent = allTasks.length + ' taken';
   if (name === 'ask') {
     setTimeout(() => {
-      const container = document.getElementById('chatMessages');
-      container.scrollTop = container.scrollHeight;
+      document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
       document.getElementById('askInput').focus();
     }, 100);
   }
