@@ -15,8 +15,8 @@
   --border: rgba(255,255,255,0.07);
   --border-active: rgba(255,255,255,0.15);
   --text: #e8ecf4;
-  --muted: #5a6478;
-  --subtle: #3a4255;
+  --muted: #8a96ae;
+  --subtle: #5a6478;
   --accent-orange: #f5a623;
   --accent-blue: #4b9eff;
   --accent-red: #ff4d4d;
@@ -33,13 +33,15 @@ body::before { content:''; position:fixed; inset:0; background:radial-gradient(e
 .logo { font-family:'Syne',sans-serif; font-size:18px; font-weight:800; color:var(--text); padding:0 24px 32px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
 .logo-dot { width:8px; height:8px; border-radius:50%; background:var(--accent-orange); box-shadow:0 0 10px var(--accent-orange); }
 .nav { padding:20px 0; flex:1; }
-.nav-section { font-size:10px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); padding:16px 24px 8px; }
+.nav-section { font-size:10px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--subtle); padding:16px 24px 8px; }
 .nav-item { display:flex; align-items:center; gap:10px; padding:10px 24px; cursor:pointer; color:var(--muted); font-size:14px; transition:all 0.15s; border-left:2px solid transparent; margin:1px 0; }
 .nav-item:hover { color:var(--text); background:rgba(255,255,255,0.03); }
 .nav-item.active { color:var(--text); border-left-color:var(--accent-orange); background:rgba(245,166,35,0.06); }
 .nav-icon { font-size:16px; width:18px; text-align:center; }
 .nav-badge { margin-left:auto; background:rgba(255,77,77,0.15); color:var(--accent-red); font-size:11px; font-weight:600; padding:2px 7px; border-radius:20px; border:1px solid rgba(255,77,77,0.2); }
 .nav-badge.green { background:rgba(61,214,140,0.12); color:var(--accent-green); border-color:rgba(61,214,140,0.2); }
+.nav-badge.blue { background:rgba(75,158,255,0.12); color:var(--accent-blue); border-color:rgba(75,158,255,0.2); }
+.nav-badge.orange { background:rgba(245,166,35,0.12); color:var(--accent-orange); border-color:rgba(245,166,35,0.2); }
 .sidebar-footer { padding:20px 24px; border-top:1px solid var(--border); }
 .user-pill { display:flex; align-items:center; gap:10px; padding:10px 12px; background:var(--card); border-radius:10px; border:1px solid var(--border); }
 .user-avatar { width:30px; height:30px; border-radius:8px; background:linear-gradient(135deg,var(--accent-orange),var(--accent-purple)); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:white; font-family:'Syne',sans-serif; }
@@ -61,6 +63,19 @@ body::before { content:''; position:fixed; inset:0; background:radial-gradient(e
 .search-bar input::placeholder { color:var(--muted); }
 .btn-icon { width:38px; height:38px; border-radius:10px; border:1px solid var(--border); background:var(--surface); color:var(--muted); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.15s; font-size:16px; }
 .btn-icon:hover { border-color:var(--border-active); color:var(--text); }
+
+/* CONTEXT FILTER BAR */
+.ctx-filter-bar { padding:10px 32px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px; background:rgba(10,13,20,0.6); backdrop-filter:blur(20px); position:sticky; top:77px; z-index:49; flex-wrap:wrap; }
+.ctx-filter-label { font-size:10px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--subtle); margin-right:4px; }
+.ctx-chip { padding:5px 13px; border-radius:20px; font-size:12px; font-weight:500; border:1px solid var(--border); background:transparent; color:var(--muted); cursor:pointer; transition:all 0.15s; font-family:'DM Sans',sans-serif; white-space:nowrap; }
+.ctx-chip:hover { border-color:var(--border-active); color:var(--text); }
+.ctx-chip.active { color:white; border-color:transparent; }
+.ctx-chip[data-ctx="all"].active { background:rgba(255,255,255,0.1); color:var(--text); border-color:var(--border-active); }
+.ctx-chip[data-ctx="superellipse"].active { background:rgba(75,158,255,0.15); border-color:rgba(75,158,255,0.35); color:#7bb8ff; }
+.ctx-chip[data-ctx="little_nirvana"].active { background:rgba(61,214,140,0.15); border-color:rgba(61,214,140,0.35); color:#3dd68c; }
+.ctx-chip[data-ctx="quantum_design"].active { background:rgba(167,139,250,0.15); border-color:rgba(167,139,250,0.35); color:#c4b5fd; }
+.ctx-chip[data-ctx="prive"].active { background:rgba(245,166,35,0.15); border-color:rgba(245,166,35,0.35); color:var(--accent-orange); }
+.ctx-chip[data-ctx="algemeen"].active { background:rgba(90,100,120,0.2); border-color:rgba(90,100,120,0.4); color:var(--muted); }
 
 /* CONTENT */
 .content { padding:28px 32px; flex:1; }
@@ -113,7 +128,7 @@ body::before { content:''; position:fixed; inset:0; background:radial-gradient(e
 .b-high { background:rgba(245,166,35,0.12); color:var(--accent-orange); border:1px solid rgba(245,166,35,0.2); }
 .b-medium { background:rgba(75,158,255,0.12); color:var(--accent-blue); border:1px solid rgba(75,158,255,0.2); }
 .b-low { background:rgba(61,214,140,0.12); color:var(--accent-green); border:1px solid rgba(61,214,140,0.2); }
-.b-fyi,.b-done,.b-snoozed,.b-normal { background:rgba(90,100,120,0.2); color:var(--muted); border:1px solid var(--border); }
+.b-fyi,.b-done,.b-snoozed,.b-normal,.b-open { background:rgba(90,100,120,0.2); color:var(--muted); border:1px solid var(--border); }
 .b-action { background:rgba(167,139,250,0.12); color:var(--accent-purple); border:1px solid rgba(167,139,250,0.2); }
 .item-title { font-family:'Syne',sans-serif; font-size:15px; font-weight:600; margin-bottom:6px; line-height:1.3; }
 .item-summary { font-size:13px; color:var(--muted); line-height:1.55; margin-bottom:14px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
@@ -144,8 +159,11 @@ body::before { content:''; position:fixed; inset:0; background:radial-gradient(e
 .contact-name { font-family:'Syne',sans-serif; font-size:14px; font-weight:600; }
 .contact-company { font-size:12px; color:var(--muted); margin-top:1px; }
 .contact-role { font-size:12px; color:var(--muted); line-height:1.5; }
+.contact-actions { display:flex; gap:6px; margin-top:12px; opacity:0; transition:opacity 0.15s; }
+.contact-card:hover .contact-actions { opacity:1; }
 
 /* PROJECTS */
+.projects-header { display:flex; align-items:center; margin-bottom:16px; }
 .projects-list { display:flex; flex-direction:column; gap:10px; }
 .project-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:18px 20px; display:flex; align-items:center; gap:16px; transition:all 0.2s; }
 .project-card:hover { border-color:var(--border-active); }
@@ -153,39 +171,34 @@ body::before { content:''; position:fixed; inset:0; background:radial-gradient(e
 .project-info { flex:1; }
 .project-name { font-family:'Syne',sans-serif; font-size:15px; font-weight:600; margin-bottom:3px; }
 .project-partner { font-size:12px; color:var(--muted); }
-.project-deadline { font-size:12px; color:var(--muted); text-align:right; }
+.project-deadline { font-size:12px; color:var(--muted); text-align:right; white-space:nowrap; }
 .project-deadline strong { display:block; color:var(--text); font-size:13px; }
+.project-actions { display:flex; gap:6px; flex-shrink:0; opacity:0; transition:opacity 0.15s; }
+.project-card:hover .project-actions { opacity:1; }
 
-/* ── TASKS TAB ──────────────────────────────── */
+/* TASKS */
 .tasks-toolbar { display:flex; align-items:center; gap:8px; margin-bottom:24px; flex-wrap:wrap; }
 .task-view-btn { padding:6px 16px; border-radius:20px; font-size:12px; font-weight:500; border:1px solid var(--border); background:transparent; color:var(--muted); cursor:pointer; transition:all 0.15s; font-family:'DM Sans',sans-serif; }
 .task-view-btn:hover { border-color:var(--border-active); color:var(--text); }
 .task-view-btn.active { background:rgba(245,166,35,0.1); border-color:rgba(245,166,35,0.3); color:var(--accent-orange); }
 .new-task-btn { margin-left:auto; display:flex; align-items:center; gap:6px; padding:8px 18px; border-radius:10px; border:1px solid rgba(245,166,35,0.3); background:rgba(245,166,35,0.08); color:var(--accent-orange); font-size:13px; font-weight:600; cursor:pointer; transition:all 0.15s; font-family:'Syne',sans-serif; }
 .new-task-btn:hover { background:rgba(245,166,35,0.15); }
-
 .ctx-group { margin-bottom:28px; }
 .ctx-group-header { display:flex; align-items:center; gap:10px; margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--border); }
 .ctx-group-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
 .ctx-group-name { font-family:'Syne',sans-serif; font-size:15px; font-weight:700; }
 .ctx-group-count { font-size:12px; color:var(--muted); margin-left:auto; }
-
-.proj-group { margin-bottom:14px; margin-left:0; }
+.proj-group { margin-bottom:14px; }
 .proj-group-label { font-size:10px; font-weight:600; letter-spacing:1.2px; text-transform:uppercase; color:var(--muted); margin-bottom:8px; padding-left:4px; }
-
 .task-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:13px 16px; display:flex; align-items:center; gap:12px; margin-bottom:6px; transition:all 0.2s; animation:fadeIn 0.25s ease both; }
 .task-card:hover { border-color:var(--border-active); background:var(--card-hover); }
 .task-card.is-done { opacity:0.4; }
-
 .task-chk { width:18px; height:18px; border-radius:5px; border:1.5px solid var(--subtle); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:11px; cursor:pointer; transition:all 0.15s; }
 .task-chk:hover { border-color:var(--accent-green); }
 .task-chk.checked { background:var(--accent-green); border-color:var(--accent-green); color:#0a0d14; font-weight:700; }
-
 .task-title-text { flex:1; font-size:13px; color:var(--text); line-height:1.4; }
 .task-card.is-done .task-title-text { text-decoration:line-through; color:var(--muted); }
-
 .task-desc { font-size:11px; color:var(--muted); margin-top:2px; }
-
 .task-date-wrap { position:relative; display:flex; align-items:center; flex-shrink:0; }
 .task-date-label { font-size:11px; color:var(--muted); cursor:pointer; padding:3px 9px; border-radius:20px; border:1px solid transparent; white-space:nowrap; transition:border-color 0.15s; }
 .task-date-label:hover { border-color:var(--border-active); }
@@ -194,7 +207,6 @@ body::before { content:''; position:fixed; inset:0; background:radial-gradient(e
 .task-date-label.is-tomorrow { color:var(--accent-orange); }
 .task-date-label.is-none { color:var(--subtle); font-style:italic; }
 .task-date-input { position:absolute; opacity:0; width:1px; height:1px; pointer-events:none; top:0; left:0; }
-
 .task-prio-badge { padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; cursor:pointer; user-select:none; white-space:nowrap; transition:opacity 0.1s; flex-shrink:0; }
 .task-prio-badge:hover { opacity:0.75; }
 .task-prio-badge:active { transform:scale(0.96); }
@@ -202,8 +214,37 @@ body::before { content:''; position:fixed; inset:0; background:radial-gradient(e
 .tp-high { background:rgba(245,166,35,0.12); color:var(--accent-orange); border:1px solid rgba(245,166,35,0.2); }
 .tp-normal { background:rgba(90,100,120,0.2); color:var(--muted); border:1px solid var(--border); }
 
+/* AGENDA */
+.agenda-toolbar { display:flex; align-items:center; gap:8px; margin-bottom:24px; flex-wrap:wrap; }
+.new-event-placeholder { font-size:12px; color:var(--subtle); padding:6px 14px; border:1px dashed var(--border); border-radius:20px; }
+.agenda-day-group { margin-bottom:28px; }
+.agenda-day-header { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+.agenda-day-dot { width:8px; height:8px; border-radius:50%; background:var(--accent-orange); flex-shrink:0; }
+.agenda-day-dot.past { background:var(--subtle); }
+.agenda-day-label { font-family:'Syne',sans-serif; font-size:15px; font-weight:700; }
+.agenda-day-sub { font-size:12px; color:var(--muted); }
+.agenda-day-count { font-size:12px; color:var(--subtle); margin-left:auto; }
+.event-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px 20px; margin-bottom:8px; display:flex; gap:16px; transition:all 0.2s; animation:fadeIn 0.25s ease both; }
+.event-card:hover { border-color:var(--border-active); background:var(--card-hover); }
+.event-card.is-cancelled { opacity:0.4; border-style:dashed; }
+.event-card.is-past { opacity:0.6; }
+.event-time-col { flex-shrink:0; width:72px; text-align:right; }
+.event-time-start { font-family:'Syne',sans-serif; font-size:15px; font-weight:700; color:var(--text); line-height:1; }
+.event-time-end { font-size:11px; color:var(--muted); margin-top:3px; }
+.event-time-allday { font-size:11px; font-weight:600; color:var(--accent-blue); letter-spacing:0.5px; }
+.event-divider { width:1px; background:var(--border); flex-shrink:0; border-radius:1px; }
+.event-body { flex:1; min-width:0; }
+.event-title { font-family:'Syne',sans-serif; font-size:14px; font-weight:600; margin-bottom:5px; line-height:1.3; }
+.event-meta { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:6px; }
+.event-meta-item { font-size:12px; color:var(--muted); display:flex; align-items:center; gap:4px; }
+.event-summary { font-size:12px; color:var(--muted); line-height:1.5; margin-top:6px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.event-actions { display:flex; gap:6px; margin-left:auto; flex-shrink:0; align-items:flex-start; opacity:0; transition:opacity 0.15s; }
+.event-card:hover .event-actions { opacity:1; }
+.event-badge-cancelled { background:rgba(255,77,77,0.12); color:#ff7070; border:1px solid rgba(255,77,77,0.2); padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; }
+.event-badge-online { background:rgba(75,158,255,0.12); color:#7bb8ff; border:1px solid rgba(75,158,255,0.2); padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; }
+
 /* MODAL FORM FIELDS */
-.modal-input { width:100%; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:9px 12px; color:var(--text); font-size:13px; font-family:'DM Sans',sans-serif; outline:none; margin-top:0; transition:border-color 0.15s; }
+.modal-input { width:100%; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:9px 12px; color:var(--text); font-size:13px; font-family:'DM Sans',sans-serif; outline:none; transition:border-color 0.15s; }
 .modal-input:focus { border-color:var(--border-active); }
 .modal-select { width:100%; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:9px 12px; color:var(--text); font-size:13px; font-family:'DM Sans',sans-serif; outline:none; cursor:pointer; transition:border-color 0.15s; }
 .modal-select:focus { border-color:var(--border-active); }
@@ -211,7 +252,7 @@ body::before { content:''; position:fixed; inset:0; background:radial-gradient(e
 .modal-textarea:focus { border-color:var(--border-active); }
 
 /* ASK */
-.ask-panel { max-width:760px; display:flex; flex-direction:column; height:calc(100vh - 180px); }
+.ask-panel { max-width:760px; display:flex; flex-direction:column; height:calc(100vh - 220px); }
 .ask-toolbar { display:flex; align-items:center; gap:10px; margin-bottom:16px; }
 .ask-session-label { font-size:11px; color:var(--muted); flex:1; }
 .ask-session-id { color:var(--subtle); font-family:monospace; font-size:10px; }
@@ -257,11 +298,12 @@ body::before { content:''; position:fixed; inset:0; background:radial-gradient(e
 .modal-close { width:30px; height:30px; border-radius:8px; border:1px solid var(--border); background:none; color:var(--muted); cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center; }
 .modal-field { margin-bottom:14px; }
 .modal-field-label { font-size:10px; font-weight:600; letter-spacing:1.2px; text-transform:uppercase; color:var(--muted); margin-bottom:5px; }
-.modal-field-value { font-size:13px; line-height:1.6; }
+.modal-field-value { font-size:13px; line-height:1.6; color:var(--text); }
 .modal-actions { display:flex; gap:8px; margin-top:22px; flex-wrap:wrap; }
 .btn-primary { padding:9px 18px; background:var(--accent-orange); color:#0a0d14; border:none; border-radius:9px; font-size:13px; font-weight:700; font-family:'Syne',sans-serif; cursor:pointer; }
 .btn-secondary { padding:9px 18px; background:transparent; color:var(--muted); border:1px solid var(--border); border-radius:9px; font-size:13px; cursor:pointer; font-family:'DM Sans',sans-serif; }
 .btn-danger { padding:9px 18px; background:rgba(255,77,77,0.1); color:var(--accent-red); border:1px solid rgba(255,77,77,0.2); border-radius:9px; font-size:13px; cursor:pointer; margin-left:auto; font-family:'DM Sans',sans-serif; }
+.btn-warn { padding:9px 18px; background:rgba(245,166,35,0.1); color:var(--accent-orange); border:1px solid rgba(245,166,35,0.2); border-radius:9px; font-size:13px; cursor:pointer; font-family:'DM Sans',sans-serif; }
 
 /* UTIL */
 .loading-state { display:flex; align-items:center; justify-content:center; gap:12px; padding:60px; color:var(--muted); font-size:14px; }
@@ -278,9 +320,9 @@ body::before { content:''; position:fixed; inset:0; background:radial-gradient(e
 
 <script>
 const CONFIG = {
-  supabaseUrl:  'https://lnupagxyhlbnhivsrvlg.supabase.co',
-  supabaseKey:  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxudXBhZ3h5aGxibmhpdnNydmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNzI0NjIsImV4cCI6MjA4ODc0ODQ2Mn0.3BkUalPRqw5i4_igl1mNtX2ID4_zZk67wNMmFnPp8mQ',
-  askWebhook:   'https://hook.eu2.make.com/3vjh4j3pfuab2a2p3vfvr2bwftv7hcik'
+  supabaseUrl: 'https://lnupagxyhlbnhivsrvlg.supabase.co',
+  supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxudXBhZ3h5aGxibmhpdnNydmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNzI0NjIsImV4cCI6MjA4ODc0ODQ2Mn0.3BkUalPRqw5i4_igl1mNtX2ID4_zZk67wNMmFnPp8mQ',
+  askWebhook:  'https://hook.eu2.make.com/3vjh4j3pfuab2a2p3vfvr2bwftv7hcik'
 };
 </script>
 
@@ -296,7 +338,6 @@ const CONFIG = {
   </div>
 </div>
 
-<!-- APP -->
 <div class="app">
 
   <!-- SIDEBAR -->
@@ -306,6 +347,7 @@ const CONFIG = {
       <div class="nav-section">Capture</div>
       <div class="nav-item active" onclick="switchTab('items',this)"><span class="nav-icon">⚡</span>Items<span class="nav-badge" id="urgentBadge">—</span></div>
       <div class="nav-item" onclick="switchTab('tasks',this)"><span class="nav-icon">☑</span>Tasks<span class="nav-badge green" id="tasksBadge">—</span></div>
+      <div class="nav-item" onclick="switchTab('agenda',this)"><span class="nav-icon">📅</span>Agenda<span class="nav-badge blue" id="agendaBadge">—</span></div>
       <div class="nav-item" onclick="switchTab('contacts',this)"><span class="nav-icon">👤</span>Contacts</div>
       <div class="nav-item" onclick="switchTab('projects',this)"><span class="nav-icon">📁</span>Projects</div>
       <div class="nav-section" style="margin-top:12px">Intelligence</div>
@@ -329,6 +371,17 @@ const CONFIG = {
       <div class="topbar-title" id="pageTitle">Priority Feed <span class="topbar-sub" id="pageSub"></span></div>
       <div class="search-bar"><span>🔍</span><input type="text" id="searchInput" placeholder="Search items..." oninput="onSearch()"></div>
       <button class="btn-icon" onclick="loadAll()" title="Refresh">↻</button>
+    </div>
+
+    <!-- CONTEXT FILTER BAR -->
+    <div class="ctx-filter-bar">
+      <span class="ctx-filter-label">Context</span>
+      <button class="ctx-chip active" data-ctx="all"           onclick="setCtxFilter('all',this)">Alles</button>
+      <button class="ctx-chip"        data-ctx="superellipse"  onclick="setCtxFilter('superellipse',this)">Superellipse</button>
+      <button class="ctx-chip"        data-ctx="little_nirvana" onclick="setCtxFilter('little_nirvana',this)">Little Nirvana</button>
+      <button class="ctx-chip"        data-ctx="quantum_design" onclick="setCtxFilter('quantum_design',this)">Quantum Design</button>
+      <button class="ctx-chip"        data-ctx="prive"         onclick="setCtxFilter('prive',this)">Privé</button>
+      <button class="ctx-chip"        data-ctx="algemeen"      onclick="setCtxFilter('algemeen',this)">Algemeen</button>
     </div>
 
     <div class="content">
@@ -379,16 +432,23 @@ const CONFIG = {
       <div class="tab-content" id="tab-tasks">
         <div class="insight-label">Actielijst</div>
         <div class="insight-title">Tasks</div>
-
         <div class="tasks-toolbar">
-          <button class="task-view-btn active" id="tvAll" onclick="setTaskView('all',this)">Alle taken</button>
-          <button class="task-view-btn" id="tvWeek" onclick="setTaskView('week',this)">Deze week</button>
+          <button class="task-view-btn active" id="tvAll"  onclick="setTaskView('all',this)">Alle taken</button>
+          <button class="task-view-btn"        id="tvWeek" onclick="setTaskView('week',this)">Deze week</button>
           <button class="new-task-btn" onclick="openNewTaskModal()">+ Nieuwe taak</button>
         </div>
+        <div id="tasksList"><div class="loading-state"><div class="spinner"></div>Taken laden...</div></div>
+      </div>
 
-        <div id="tasksList">
-          <div class="loading-state"><div class="spinner"></div>Taken laden...</div>
+      <!-- AGENDA TAB -->
+      <div class="tab-content" id="tab-agenda">
+        <div class="insight-label">Kalender</div>
+        <div class="insight-title">Agenda</div>
+        <div class="agenda-toolbar">
+          <button class="task-view-btn active" id="avUpcoming" onclick="setAgendaView('upcoming',this)">Komend</button>
+          <button class="task-view-btn"        id="avAll"      onclick="setAgendaView('all',this)">Alles incl. geannuleerd</button>
         </div>
+        <div id="agendaList"><div class="loading-state"><div class="spinner"></div>Afspraken laden...</div></div>
       </div>
 
       <!-- CONTACTS TAB -->
@@ -402,6 +462,10 @@ const CONFIG = {
       <div class="tab-content" id="tab-projects">
         <div class="insight-label">Work</div>
         <div class="insight-title">Projects</div>
+        <div class="projects-header">
+          <div style="flex:1"></div>
+          <button class="new-task-btn" onclick="openNewProjectModal()">+ Nieuw project</button>
+        </div>
         <div class="projects-list" id="projectsList"><div class="loading-state"><div class="spinner"></div>Loading...</div></div>
       </div>
 
@@ -436,28 +500,33 @@ const CONFIG = {
 </div>
 
 <script>
-// ── STATE ──────────────────────────────────────
-let allItems = [];
-let allTasks = [];
+// ── CONFIG ─────────────────────────────────────
+let allItems    = [];
+let allTasks    = [];
+let allEvents   = [];
+let allContacts = [];
+let allProjects = [];
 let taskWeekOnly = false;
+let agendaShowCancelled = false;
+let G_CTX = null;
 let F = { priority: null, source: null, action: false, search: '' };
-const COLORS = ['#f5a623','#4b9eff','#a78bfa','#3dd68c','#ff6b6b','#f093fb'];
 
+const COLORS = ['#f5a623','#4b9eff','#a78bfa','#3dd68c','#ff6b6b','#f093fb'];
 const CTX_ORDER  = ['superellipse','little_nirvana','quantum_design','prive','algemeen'];
 const CTX_LABELS = { superellipse:'Superellipse', little_nirvana:'Little Nirvana', quantum_design:'Quantum Design', prive:'Privé', algemeen:'Algemeen' };
 const CTX_COLORS = { superellipse:'#4b9eff', little_nirvana:'#3dd68c', quantum_design:'#a78bfa', prive:'#f5a623', algemeen:'#5a6478' };
-const PRIO_CYCLE = ['urgent','high','normal'];
+const PRIO_CYCLE  = ['urgent','high','normal'];
 const PRIO_LABELS = { urgent:'Urgent', high:'High', normal:'Normal' };
 const MONTHS = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+const DAY_NAMES = ['zondag','maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag'];
 
 // ── CHAT STATE ─────────────────────────────────
 let chatSessionId = null;
-let chatMessages = [];
+let chatMessages  = [];
 let chatLastActivity = null;
 const SESSION_TIMEOUT = 30 * 60 * 1000;
 
 function generateSessionId() { return 'dash_' + crypto.randomUUID().split('-')[0] + '_' + Date.now().toString(36); }
-
 function initChatSession() {
   const stored = sessionStorage.getItem('sb_chat_session');
   const storedTime = sessionStorage.getItem('sb_chat_time');
@@ -466,7 +535,6 @@ function initChatSession() {
   } else { newChatSession(); }
   updateSessionDisplay();
 }
-
 function newChatSession() {
   chatSessionId = generateSessionId(); chatMessages = []; chatLastActivity = Date.now();
   sessionStorage.setItem('sb_chat_session', chatSessionId);
@@ -474,17 +542,14 @@ function newChatSession() {
   updateSessionDisplay(); renderChat();
   document.getElementById('askSuggestions').style.display = 'flex';
 }
-
 function updateSessionDisplay() {
   document.getElementById('sessionDisplay').textContent = chatSessionId ? chatSessionId.slice(0,16) + '...' : '—';
 }
-
 function touchSession() {
   chatLastActivity = Date.now();
   sessionStorage.setItem('sb_chat_time', chatLastActivity.toString());
   if ((Date.now() - chatLastActivity) > SESSION_TIMEOUT) newChatSession();
 }
-
 async function loadChatHistory() {
   try {
     const data = await sb(`conversations?session_id=eq.${chatSessionId}&select=role,content,created_at&order=created_at.asc&limit=50`);
@@ -494,7 +559,6 @@ async function loadChatHistory() {
     }
   } catch(e) { console.error('Failed to load chat history:', e); }
 }
-
 function renderChat() {
   const container = document.getElementById('chatMessages');
   if (chatMessages.length === 0) {
@@ -515,7 +579,6 @@ function renderChat() {
   }).join('');
   container.scrollTop = container.scrollHeight;
 }
-
 function escHtml(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 // ── SUPABASE ────────────────────────────────────
@@ -537,10 +600,28 @@ async function sb(path, opts = {}) {
 
 // ── INIT ────────────────────────────────────────
 async function loadAll() {
-  const hasKey = CONFIG.supabaseKey && !CONFIG.supabaseKey.startsWith('JOUW_');
-  if (!hasKey) { loadMockData(); return; }
-  await Promise.all([loadItems(), loadTasks(), loadContacts(), loadProjects()]);
+  await Promise.all([loadItems(), loadTasks(), loadEvents(), loadContacts(), loadProjects()]);
   initChatSession();
+}
+
+// ── CONTEXT FILTER ───────────────────────────────
+function setCtxFilter(ctx, el) {
+  G_CTX = (ctx === 'all') ? null : ctx;
+  document.querySelectorAll('.ctx-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderCurrentTab();
+}
+function renderCurrentTab() {
+  const active = document.querySelector('.tab-content.active');
+  if (!active) return;
+  const id = active.id;
+  if (id === 'tab-items')   renderItems();
+  if (id === 'tab-tasks')   renderTasks();
+  if (id === 'tab-agenda')  renderEvents();
+}
+function matchCtx(item) {
+  if (!G_CTX) return true;
+  return (item.context || 'algemeen').toLowerCase() === G_CTX;
 }
 
 // ── ITEMS ───────────────────────────────────────
@@ -550,11 +631,12 @@ async function loadItems() {
     const data = await sb(
       'items?deleted=is.false' +
       '&or=(status.is.null,status.not.in.(done,snoozed))' +
-      '&select=id,title,summary,priority,status,source,category,relevance_score,action_required,action_description,due_date,sender_name,created_at,received_at' +
+      '&select=id,title,summary,priority,status,source,category,relevance_score,action_required,action_description,due_date,sender_name,created_at,received_at,context' +
       '&order=relevance_score.desc.nullslast,created_at.desc&limit=150'
     );
     allItems = data || [];
-    updateStats(); renderItems();
+    updateStats();
+    renderItems();
   } catch(e) {
     document.getElementById('itemsList').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><div style="font-size:13px">${e.message}</div></div>`;
   }
@@ -562,16 +644,20 @@ async function loadItems() {
 
 function updateStats() {
   const now = Date.now();
-  document.getElementById('sUrgent').textContent  = allItems.filter(i => (i.priority||'').toLowerCase() === 'urgent').length;
-  document.getElementById('sHigh').textContent    = allItems.filter(i => (i.priority||'').toLowerCase() === 'high').length;
-  document.getElementById('sActions').textContent = allItems.filter(i => i.action_required === true || i.action_required === 'true').length;
-  document.getElementById('sRecent').textContent  = allItems.filter(i => (now - new Date(i.received_at || i.created_at)) < 86400000).length;
-  const u = allItems.filter(i => (i.priority||'').toLowerCase() === 'urgent').length;
-  document.getElementById('urgentBadge').textContent = u || '—';
+  const src = G_CTX ? allItems.filter(matchCtx) : allItems;
+  document.getElementById('sUrgent').textContent  = src.filter(i => (i.priority||'').toLowerCase() === 'urgent').length;
+  document.getElementById('sHigh').textContent    = src.filter(i => (i.priority||'').toLowerCase() === 'high').length;
+  document.getElementById('sActions').textContent = src.filter(i => i.action_required === true || i.action_required === 'true').length;
+  document.getElementById('sRecent').textContent  = src.filter(i => (now - new Date(i.received_at || i.created_at).getTime()) < 86400000).length;
+  // Nav badge: total open items
+  const total = allItems.length;
+  const urgent = allItems.filter(i => (i.priority||'').toLowerCase() === 'urgent').length;
+  document.getElementById('urgentBadge').textContent = urgent > 0 ? urgent : (total > 0 ? total : '—');
 }
 
 function filtered() {
   return allItems.filter(i => {
+    if (!matchCtx(i)) return false;
     if (F.priority && F.priority !== 'all' && (i.priority||'').toLowerCase() !== F.priority) return false;
     if (F.source && (i.source||'').toLowerCase() !== F.source) return false;
     if (F.action && i.action_required !== true && i.action_required !== 'true') return false;
@@ -588,12 +674,11 @@ function barColor(score) {
   if (score >= 5) return '#4b9eff';
   return '#3a4255';
 }
-
 function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/`/g,"'").replace(/\$/g,'&#36;'); }
 
 function renderItems() {
   const items = filtered();
-  document.getElementById('itemCount').textContent = `Showing ${items.length} active items`;
+  document.getElementById('itemCount').textContent = `${items.length} actieve items`;
   document.getElementById('pageSub').textContent = allItems.length + ' total';
   if (!items.length) {
     document.getElementById('itemsList').innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><div>Geen items gevonden</div></div>';
@@ -607,17 +692,18 @@ function renderItems() {
     const status = (item.status || 'new').toLowerCase();
     const hasAction = item.action_required === true || item.action_required === 'true';
     const t = esc(item.title); const s = esc(item.summary);
-    return `<div class="item-card" style="animation-delay:${Math.min(i*20,300)}ms" onclick="openModal(${i})">
+    const ctxDot = item.context ? `<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${CTX_COLORS[item.context]||'#5a6478'};margin-right:4px;vertical-align:middle"></span>` : '';
+    return `<div class="item-card" style="animation-delay:${Math.min(i*20,300)}ms" onclick="openItemModal(${i})">
       <div class="item-card-top">
         <span class="badge b-${status}">${status}</span>
         <span class="badge b-${prio}">${prio}</span>
         ${hasAction ? '<span class="badge b-action">action</span>' : ''}
         <div class="item-meta">
-          <span class="item-date">${date}</span>
+          <span class="item-date">${ctxDot}${date}</span>
           <div class="item-actions" onclick="event.stopPropagation()">
             <button class="action-btn done" onclick="markDone('${item.id}')">✓ Done</button>
             <button class="action-btn" onclick="snooze('${item.id}')">⏸ Snooze</button>
-            <button class="action-btn del" onclick="del('${item.id}')">✕</button>
+            <button class="action-btn del" onclick="delItem('${item.id}')">✕</button>
           </div>
         </div>
       </div>
@@ -636,8 +722,8 @@ function renderItems() {
   window._renderedItems = items;
 }
 
-// ── MODAL (items) ─────────────────────────────────
-function openModal(idx) {
+// ── ITEM MODAL ────────────────────────────────────
+function openItemModal(idx) {
   const item = window._renderedItems[idx];
   document.getElementById('modalTitle').textContent = item.title || '(geen titel)';
   document.getElementById('modalBody').innerHTML = `
@@ -647,12 +733,13 @@ function openModal(idx) {
     ${item.due_date ? `<div class="modal-field"><div class="modal-field-label">Deadline</div><div class="modal-field-value">${item.due_date}</div></div>` : ''}
     ${item.sender_name ? `<div class="modal-field"><div class="modal-field-label">Van</div><div class="modal-field-value">${item.sender_name}</div></div>` : ''}
     <div class="modal-field"><div class="modal-field-label">Bron / Status / Prioriteit</div><div class="modal-field-value">${item.source||'—'} · ${item.status||'new'} · ${item.priority||'—'}</div></div>
+    <div class="modal-field"><div class="modal-field-label">Context</div><div class="modal-field-value">${CTX_LABELS[item.context]||item.context||'—'}</div></div>
     <div class="modal-field"><div class="modal-field-label">Relevantie</div><div class="modal-field-value">${item.relevance_score||0}/10</div></div>
   `;
   document.getElementById('modalActions').innerHTML = `
     <button class="btn-primary" onclick="markDone('${item.id}');closeModal()">✓ Done</button>
     <button class="btn-secondary" onclick="snooze('${item.id}');closeModal()">⏸ Snooze</button>
-    <button class="btn-danger" onclick="del('${item.id}');closeModal()">Verwijderen</button>
+    <button class="btn-danger" onclick="delItem('${item.id}');closeModal()">Verwijderen</button>
   `;
   document.getElementById('modalOverlay').classList.add('open');
 }
@@ -665,7 +752,7 @@ async function markDone(id) {
 async function snooze(id) {
   try { await sb(`items?id=eq.${id}`,{method:'PATCH',body:{status:'snoozed'},prefer:'return=minimal'}); removeItem(id); } catch(e){alert(e.message);}
 }
-async function del(id) {
+async function delItem(id) {
   if(!confirm('Item verwijderen?')) return;
   try { await sb(`items?id=eq.${id}`,{method:'PATCH',body:{deleted:true},prefer:'return=minimal'}); removeItem(id); } catch(e){alert(e.message);}
 }
@@ -685,7 +772,6 @@ async function loadTasks() {
     updateTasksBadge();
     renderTasks();
   } catch(e) {
-    // Fallback: project_name column may not exist yet — retry without it
     try {
       const data = await sb(
         'items?deleted=is.false&category=eq.Task' +
@@ -701,25 +787,17 @@ async function loadTasks() {
     }
   }
 }
-
 function updateTasksBadge() {
   const n = allTasks.length;
-  document.getElementById('tasksBadge').textContent = n || '—';
+  document.getElementById('tasksBadge').textContent = n > 0 ? n : '—';
 }
-
-function todayStr() {
-  const d = new Date();
-  return d.toISOString().split('T')[0];
-}
-
+function todayStr() { return new Date().toISOString().split('T')[0]; }
 function endOfWeekStr() {
-  const d = new Date();
-  const day = d.getDay(); // 0=Sun
-  const diff = day === 0 ? 6 : 7 - day; // days until Sunday
+  const d = new Date(); const day = d.getDay();
+  const diff = day === 0 ? 6 : 7 - day;
   d.setDate(d.getDate() + diff);
   return d.toISOString().split('T')[0];
 }
-
 function formatTaskDate(due) {
   if (!due) return { label:'+ datum', cls:'is-none' };
   const today = todayStr();
@@ -730,7 +808,6 @@ function formatTaskDate(due) {
   if (due === tomorrowStr) return { label:'Morgen', cls:'is-tomorrow' };
   return { label: fmtDate(due), cls:'' };
 }
-
 function fmtDate(iso) {
   if (!iso) return '';
   const d = new Date(iso + 'T00:00:00');
@@ -739,303 +816,453 @@ function fmtDate(iso) {
 
 function renderTasks() {
   const today = todayStr();
-  const eow = endOfWeekStr();
-
-  let tasks = allTasks;
-  if (taskWeekOnly) {
-    tasks = tasks.filter(t => t.due_date && t.due_date >= today && t.due_date <= eow);
-  }
-
+  const eow   = endOfWeekStr();
+  let tasks = allTasks.filter(matchCtx);
+  if (taskWeekOnly) tasks = tasks.filter(t => t.due_date && t.due_date >= today && t.due_date <= eow);
   if (!tasks.length) {
     document.getElementById('tasksList').innerHTML = `<div class="empty-state"><div class="empty-icon">☑</div><div>${taskWeekOnly ? 'Geen taken deze week' : 'Geen open taken'}</div></div>`;
     return;
   }
-
-  // Group by context
   const groups = {};
   tasks.forEach(t => {
-    const ctx = (t.context || 'algemeen').toLowerCase();
+    const ctx  = (t.context || 'algemeen').toLowerCase();
     if (!groups[ctx]) groups[ctx] = {};
     const proj = t.project_name || 'Geen project';
     if (!groups[ctx][proj]) groups[ctx][proj] = [];
     groups[ctx][proj].push(t);
   });
-
-  // Render in fixed context order
   const ctxKeys = [...CTX_ORDER.filter(c => groups[c]), ...Object.keys(groups).filter(c => !CTX_ORDER.includes(c))];
-
   let html = '';
   ctxKeys.forEach(ctx => {
     const projMap = groups[ctx];
-    const totalInCtx = Object.values(projMap).reduce((s,arr) => s+arr.length, 0);
+    const total = Object.values(projMap).reduce((s,a) => s+a.length, 0);
     const dot = CTX_COLORS[ctx] || '#5a6478';
     const label = CTX_LABELS[ctx] || ctx;
-
     html += `<div class="ctx-group">
       <div class="ctx-group-header">
         <div class="ctx-group-dot" style="background:${dot}"></div>
         <div class="ctx-group-name">${label}</div>
-        <div class="ctx-group-count">${totalInCtx} ${totalInCtx === 1 ? 'taak' : 'taken'}</div>
+        <div class="ctx-group-count">${total} ${total===1?'taak':'taken'}</div>
       </div>`;
-
     Object.entries(projMap).forEach(([proj, taskList]) => {
-      html += `<div class="proj-group">
-        <div class="proj-group-label">${esc(proj)}</div>`;
+      html += `<div class="proj-group"><div class="proj-group-label">${esc(proj)}</div>`;
       taskList.forEach(t => {
         const { label: dateLabel, cls: dateCls } = formatTaskDate(t.due_date);
         const prio = (t.priority || 'normal').toLowerCase();
         const prioClass = PRIO_CYCLE.includes(prio) ? `tp-${prio}` : 'tp-normal';
-        const prioLabel = PRIO_LABELS[prio] || prio;
         html += `<div class="task-card" id="tc-${t.id}">
           <div class="task-chk" onclick="markTaskDone('${t.id}')"></div>
           <div style="flex:1;min-width:0">
-            <div class="task-title-text">${esc(t.title) || '(geen titel)'}</div>
+            <div class="task-title-text">${esc(t.title)||'(geen titel)'}</div>
             ${t.action_description ? `<div class="task-desc">${esc(t.action_description)}</div>` : ''}
           </div>
           <div class="task-date-wrap">
             <span class="task-date-label ${dateCls}" onclick="openTaskDate('${t.id}')">${dateLabel}</span>
             <input class="task-date-input" id="tdi-${t.id}" type="date" value="${t.due_date||''}" onchange="saveTaskDeadline('${t.id}',this.value)" onblur="closeTaskDate('${t.id}')">
           </div>
-          <span class="task-prio-badge ${prioClass}" id="tpb-${t.id}" onclick="cycleTaskPrio('${t.id}')">${prioLabel}</span>
+          <span class="task-prio-badge ${prioClass}" id="tpb-${t.id}" onclick="cycleTaskPrio('${t.id}')">${PRIO_LABELS[prio]||prio}</span>
         </div>`;
       });
       html += '</div>';
     });
     html += '</div>';
   });
-
   document.getElementById('tasksList').innerHTML = html;
 }
 
-// ── TASK INTERACTIONS ─────────────────────────────
 async function markTaskDone(id) {
   const card = document.getElementById('tc-'+id);
   if (card) { card.classList.add('is-done'); card.querySelector('.task-chk').classList.add('checked'); card.querySelector('.task-chk').textContent = '✓'; }
   try {
     await sb(`items?id=eq.${id}`, {method:'PATCH', body:{status:'done', completed:true}, prefer:'return=minimal'});
-    allTasks = allTasks.filter(t => t.id !== id);
-    updateTasksBadge();
+    allTasks = allTasks.filter(t => t.id !== id); updateTasksBadge();
     setTimeout(() => renderTasks(), 600);
   } catch(e) {
     if (card) { card.classList.remove('is-done'); card.querySelector('.task-chk').classList.remove('checked'); card.querySelector('.task-chk').textContent = ''; }
     alert(e.message);
   }
 }
-
 async function cycleTaskPrio(id) {
-  const badge = document.getElementById('tpb-'+id);
-  if (!badge) return;
-  const cur = PRIO_CYCLE.find(p => badge.classList.contains('tp-'+p)) || 'normal';
+  const badge = document.getElementById('tpb-'+id); if (!badge) return;
+  const cur  = PRIO_CYCLE.find(p => badge.classList.contains('tp-'+p)) || 'normal';
   const next = PRIO_CYCLE[(PRIO_CYCLE.indexOf(cur)+1) % PRIO_CYCLE.length];
   PRIO_CYCLE.forEach(p => badge.classList.remove('tp-'+p));
-  badge.classList.add('tp-'+next);
-  badge.textContent = PRIO_LABELS[next];
-  // Update local state
-  const task = allTasks.find(t => t.id === id);
-  if (task) task.priority = next;
-  try {
-    await sb(`items?id=eq.${id}`, {method:'PATCH', body:{priority: next.charAt(0).toUpperCase()+next.slice(1)}, prefer:'return=minimal'});
-  } catch(e) {
-    console.error('Prioriteit opslaan mislukt:', e.message);
-  }
+  badge.classList.add('tp-'+next); badge.textContent = PRIO_LABELS[next];
+  const task = allTasks.find(t => t.id === id); if (task) task.priority = next;
+  try { await sb(`items?id=eq.${id}`, {method:'PATCH', body:{priority: next.charAt(0).toUpperCase()+next.slice(1)}, prefer:'return=minimal'}); } catch(e) {}
 }
-
 function openTaskDate(id) {
-  const inp = document.getElementById('tdi-'+id);
-  if (!inp) return;
-  inp.style.position = 'absolute';
-  inp.style.opacity = '1';
-  inp.style.width = '150px';
-  inp.style.height = '34px';
-  inp.style.pointerEvents = 'auto';
-  inp.style.zIndex = '20';
-  inp.style.top = '0';
-  inp.style.left = '0';
-  inp.style.background = 'var(--surface)';
-  inp.style.border = '1px solid var(--border-active)';
-  inp.style.borderRadius = '8px';
-  inp.style.padding = '0 8px';
-  inp.style.color = 'var(--text)';
-  inp.style.fontSize = '12px';
-  inp.focus();
-  try { inp.showPicker && inp.showPicker(); } catch(e) {}
+  const inp = document.getElementById('tdi-'+id); if (!inp) return;
+  Object.assign(inp.style, { position:'absolute', opacity:'1', width:'150px', height:'34px', pointerEvents:'auto', zIndex:'20', top:'0', left:'0', background:'var(--surface)', border:'1px solid var(--border-active)', borderRadius:'8px', padding:'0 8px', color:'var(--text)', fontSize:'12px' });
+  inp.focus(); try { inp.showPicker && inp.showPicker(); } catch(e) {}
 }
-
 function closeTaskDate(id) {
-  const inp = document.getElementById('tdi-'+id);
-  if (!inp) return;
-  inp.style.opacity = '0';
-  inp.style.pointerEvents = 'none';
-  inp.style.width = '1px';
-  inp.style.height = '1px';
+  const inp = document.getElementById('tdi-'+id); if (!inp) return;
+  Object.assign(inp.style, { opacity:'0', pointerEvents:'none', width:'1px', height:'1px' });
 }
-
 async function saveTaskDeadline(id, value) {
   closeTaskDate(id);
-  // Update date label
   const label = document.querySelector(`#tc-${id} .task-date-label`);
-  if (label) {
-    const { label: dl, cls } = formatTaskDate(value || null);
-    label.textContent = dl;
-    label.className = 'task-date-label' + (cls ? ' '+cls : '');
-  }
-  // Update local state
-  const task = allTasks.find(t => t.id === id);
-  if (task) task.due_date = value || null;
-  try {
-    await sb(`items?id=eq.${id}`, {method:'PATCH', body:{due_date: value || null}, prefer:'return=minimal'});
-  } catch(e) {
-    console.error('Deadline opslaan mislukt:', e.message);
-  }
+  if (label) { const { label: dl, cls } = formatTaskDate(value||null); label.textContent = dl; label.className = 'task-date-label'+(cls?' '+cls:''); }
+  const task = allTasks.find(t => t.id === id); if (task) task.due_date = value || null;
+  try { await sb(`items?id=eq.${id}`, {method:'PATCH', body:{due_date: value||null}, prefer:'return=minimal'}); } catch(e) {}
 }
-
-// ── NEW TASK MODAL ────────────────────────────────
-function openNewTaskModal() {
-  document.getElementById('modalTitle').textContent = 'Nieuwe taak aanmaken';
-  document.getElementById('modalBody').innerHTML = `
-    <div class="modal-field">
-      <div class="modal-field-label">Titel *</div>
-      <input class="modal-input" id="ntTitle" type="text" placeholder="Wat moet er gedaan worden?" autofocus>
-    </div>
-    <div class="modal-field">
-      <div class="modal-field-label">Context *</div>
-      <select class="modal-select" id="ntContext">
-        <option value="superellipse">Superellipse</option>
-        <option value="little_nirvana">Little Nirvana</option>
-        <option value="quantum_design">Quantum Design</option>
-        <option value="prive">Privé</option>
-        <option value="algemeen">Algemeen</option>
-      </select>
-    </div>
-    <div class="modal-field">
-      <div class="modal-field-label">Project</div>
-      <input class="modal-input" id="ntProject" type="text" placeholder="Projectnaam (optioneel)">
-    </div>
-    <div class="modal-field">
-      <div class="modal-field-label">Prioriteit</div>
-      <select class="modal-select" id="ntPriority">
-        <option value="Normal" selected>Normal</option>
-        <option value="High">High</option>
-        <option value="Urgent">Urgent</option>
-      </select>
-    </div>
-    <div class="modal-field">
-      <div class="modal-field-label">Deadline</div>
-      <input class="modal-input" id="ntDeadline" type="date">
-    </div>
-    <div class="modal-field">
-      <div class="modal-field-label">Omschrijving</div>
-      <textarea class="modal-textarea" id="ntDesc" placeholder="Extra toelichting (optioneel)"></textarea>
-    </div>
-  `;
-  document.getElementById('modalActions').innerHTML = `
-    <button class="btn-primary" onclick="createTask()">+ Aanmaken</button>
-    <button class="btn-secondary" onclick="closeModal()">Annuleren</button>
-  `;
-  document.getElementById('modalOverlay').classList.add('open');
-  setTimeout(() => document.getElementById('ntTitle')?.focus(), 100);
-}
-
-async function createTask() {
-  const title   = document.getElementById('ntTitle')?.value?.trim();
-  const context = document.getElementById('ntContext')?.value;
-  const project = document.getElementById('ntProject')?.value?.trim() || null;
-  const priority = document.getElementById('ntPriority')?.value;
-  const deadline = document.getElementById('ntDeadline')?.value || null;
-  const desc    = document.getElementById('ntDesc')?.value?.trim() || null;
-
-  if (!title) { alert('Titel is verplicht.'); return; }
-
-  const payload = {
-    title,
-    category: 'Task',
-    action_required: true,
-    action_description: desc,
-    priority,
-    due_date: deadline,
-    context,
-    project_name: project,
-    source: 'dashboard',
-    status: 'open',
-    deleted: false
-  };
-
-  try {
-    const result = await sb('items', {method:'POST', body:payload, prefer:'return=representation'});
-    closeModal();
-    // Add to local state and re-render
-    if (result && result[0]) allTasks.push({...result[0], project_name: project});
-    else allTasks.push({id: crypto.randomUUID(), ...payload});
-    updateTasksBadge();
-    renderTasks();
-  } catch(e) {
-    alert('Aanmaken mislukt: ' + e.message);
-  }
-}
-
-// ── TASKS VIEW TOGGLE ────────────────────────────
 function setTaskView(view, el) {
   taskWeekOnly = view === 'week';
   document.querySelectorAll('.task-view-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active'); renderTasks();
+}
+function openNewTaskModal() {
+  document.getElementById('modalTitle').textContent = 'Nieuwe taak aanmaken';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="modal-field"><div class="modal-field-label">Titel *</div><input class="modal-input" id="ntTitle" type="text" placeholder="Wat moet er gedaan worden?" autofocus></div>
+    <div class="modal-field"><div class="modal-field-label">Context *</div><select class="modal-select" id="ntContext"><option value="superellipse">Superellipse</option><option value="little_nirvana">Little Nirvana</option><option value="quantum_design">Quantum Design</option><option value="prive">Privé</option><option value="algemeen">Algemeen</option></select></div>
+    <div class="modal-field"><div class="modal-field-label">Project</div><input class="modal-input" id="ntProject" type="text" placeholder="Projectnaam (optioneel)"></div>
+    <div class="modal-field"><div class="modal-field-label">Prioriteit</div><select class="modal-select" id="ntPriority"><option value="Normal" selected>Normal</option><option value="High">High</option><option value="Urgent">Urgent</option></select></div>
+    <div class="modal-field"><div class="modal-field-label">Deadline</div><input class="modal-input" id="ntDeadline" type="date"></div>
+    <div class="modal-field"><div class="modal-field-label">Omschrijving</div><textarea class="modal-textarea" id="ntDesc" placeholder="Extra toelichting (optioneel)"></textarea></div>
+  `;
+  document.getElementById('modalActions').innerHTML = `<button class="btn-primary" onclick="createTask()">+ Aanmaken</button><button class="btn-secondary" onclick="closeModal()">Annuleren</button>`;
+  document.getElementById('modalOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('ntTitle')?.focus(), 100);
+}
+async function createTask() {
+  const title    = document.getElementById('ntTitle')?.value?.trim();
+  const context  = document.getElementById('ntContext')?.value;
+  const project  = document.getElementById('ntProject')?.value?.trim() || null;
+  const priority = document.getElementById('ntPriority')?.value;
+  const deadline = document.getElementById('ntDeadline')?.value || null;
+  const desc     = document.getElementById('ntDesc')?.value?.trim() || null;
+  if (!title) { alert('Titel is verplicht.'); return; }
+  const payload = { title, category:'Task', action_required:true, action_description:desc, priority, due_date:deadline, context, project_name:project, source:'dashboard', status:'open', deleted:false };
+  try {
+    const result = await sb('items', {method:'POST', body:payload, prefer:'return=representation'});
+    closeModal();
+    allTasks.push(result && result[0] ? {...result[0], project_name:project} : {id:crypto.randomUUID(),...payload});
+    updateTasksBadge(); renderTasks();
+  } catch(e) { alert('Aanmaken mislukt: ' + e.message); }
+}
+
+// ── AGENDA ───────────────────────────────────────
+async function loadEvents() {
+  document.getElementById('agendaList').innerHTML = '<div class="loading-state"><div class="spinner"></div>Afspraken laden...</div>';
+  try {
+    const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 1);
+    const data = await sb(
+      `events?start_time=gte.${cutoff.toISOString()}` +
+      '&select=id,title,start_time,end_time,location,organizer,is_online,meeting_url,summary,context,ical_uid,is_cancelled,is_all_day' +
+      '&order=start_time.asc&limit=100'
+    );
+    allEvents = data || [];
+    updateAgendaBadge();
+    renderEvents();
+  } catch(e) {
+    document.getElementById('agendaList').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><div style="font-size:13px">${e.message}</div></div>`;
+  }
+}
+
+function updateAgendaBadge() {
+  const now = new Date().toISOString();
+  const upcoming = allEvents.filter(e => !e.is_cancelled && e.start_time >= now).length;
+  document.getElementById('agendaBadge').textContent = upcoming > 0 ? upcoming : '—';
+}
+
+function setAgendaView(view, el) {
+  agendaShowCancelled = view === 'all';
+  document.querySelectorAll('#tab-agenda .task-view-btn').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
-  renderTasks();
+  renderEvents();
+}
+
+function renderEvents() {
+  let events = allEvents.filter(e => {
+    if (!agendaShowCancelled && e.is_cancelled) return false;
+    if (G_CTX && (e.context||'').toLowerCase() !== G_CTX) return false;
+    return true;
+  });
+
+  if (!events.length) {
+    document.getElementById('agendaList').innerHTML = `<div class="empty-state"><div class="empty-icon">📅</div><div>Geen afspraken gevonden</div></div>`;
+    return;
+  }
+
+  // Group by day
+  const groups = {};
+  const today = todayStr();
+  const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
+  const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+  events.forEach(e => {
+    const dayKey = e.start_time ? e.start_time.split('T')[0] : 'unknown';
+    if (!groups[dayKey]) groups[dayKey] = [];
+    groups[dayKey].push(e);
+  });
+
+  const now = new Date();
+  let html = '';
+  Object.keys(groups).sort().forEach(dayKey => {
+    const dayEvents = groups[dayKey];
+    const dayDate = new Date(dayKey + 'T00:00:00');
+    const isPast = dayKey < today;
+    let dayLabel;
+    if (dayKey === today) dayLabel = 'Vandaag';
+    else if (dayKey === tomorrowStr) dayLabel = 'Morgen';
+    else dayLabel = DAY_NAMES[dayDate.getDay()].charAt(0).toUpperCase() + DAY_NAMES[dayDate.getDay()].slice(1);
+    const daySub = dayDate.getDate() + ' ' + MONTHS[dayDate.getMonth()] + ' ' + dayDate.getFullYear();
+
+    html += `<div class="agenda-day-group">
+      <div class="agenda-day-header">
+        <div class="agenda-day-dot${isPast?' past':''}"></div>
+        <div class="agenda-day-label">${dayLabel}</div>
+        <div class="agenda-day-sub">${daySub}</div>
+        <div class="agenda-day-count">${dayEvents.length} ${dayEvents.length===1?'afspraak':'afspraken'}</div>
+      </div>`;
+
+    dayEvents.forEach(e => {
+      const isPastEvent = e.start_time && new Date(e.start_time) < now;
+      const isCancelled = e.is_cancelled;
+      let timeHtml;
+      if (e.is_all_day) {
+        timeHtml = `<div class="event-time-allday">Hele dag</div>`;
+      } else {
+        const startStr = e.start_time ? new Date(e.start_time).toLocaleTimeString('nl-BE',{hour:'2-digit',minute:'2-digit'}) : '—';
+        const endStr   = e.end_time   ? new Date(e.end_time).toLocaleTimeString('nl-BE',{hour:'2-digit',minute:'2-digit'})   : '';
+        timeHtml = `<div class="event-time-start">${startStr}</div>${endStr?`<div class="event-time-end">${endStr}</div>`:''}`;
+      }
+      const ctxColor = CTX_COLORS[e.context] || '#5a6478';
+      const ctxLabel = CTX_LABELS[e.context] || e.context || '';
+      html += `<div class="event-card${isCancelled?' is-cancelled':''}${isPastEvent&&!isCancelled?' is-past':''}">
+        <div class="event-time-col">${timeHtml}</div>
+        <div class="event-divider"></div>
+        <div class="event-body">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+            <div class="event-title">${esc(e.title)||'(geen titel)'}</div>
+            ${isCancelled ? '<span class="event-badge-cancelled">Afgezegd</span>' : ''}
+            ${e.is_online && !isCancelled ? '<span class="event-badge-online">Online</span>' : ''}
+          </div>
+          <div class="event-meta">
+            ${e.organizer ? `<span class="event-meta-item">👤 ${esc(e.organizer)}</span>` : ''}
+            ${e.location ? `<span class="event-meta-item">📍 ${esc(e.location)}</span>` : ''}
+            ${ctxLabel ? `<span class="event-meta-item"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${ctxColor}"></span> ${ctxLabel}</span>` : ''}
+          </div>
+          ${e.summary ? `<div class="event-summary">${esc(e.summary)}</div>` : ''}
+          ${e.meeting_url && !isCancelled ? `<div style="margin-top:8px"><a href="${e.meeting_url}" target="_blank" style="font-size:12px;color:var(--accent-blue);text-decoration:none">🔗 Teams link →</a></div>` : ''}
+        </div>
+        ${!isCancelled && !isPastEvent ? `
+        <div class="event-actions" onclick="event.stopPropagation()">
+          <button class="action-btn del" onclick="cancelEvent('${e.id}','${esc(e.title)}')">Annuleer</button>
+        </div>` : ''}
+      </div>`;
+    });
+    html += '</div>';
+  });
+
+  document.getElementById('agendaList').innerHTML = html;
+}
+
+async function cancelEvent(id, title) {
+  if (!confirm(`Afspraak "${title}" annuleren?`)) return;
+  try {
+    await sb(`events?id=eq.${id}`, {method:'PATCH', body:{is_cancelled:true}, prefer:'return=minimal'});
+    const ev = allEvents.find(e => e.id === id);
+    if (ev) ev.is_cancelled = true;
+    updateAgendaBadge();
+    renderEvents();
+  } catch(e) { alert('Annulering mislukt: ' + e.message); }
 }
 
 // ── CONTACTS ─────────────────────────────────────
 async function loadContacts() {
   try {
     const data = await sb('contacts?select=id,full_name,email_address,company,role_title,relationship_type,importance,last_contact_at,interaction_count,notes&order=importance.asc,full_name.asc&limit=50');
-    const el = document.getElementById('contactsList');
-    if (!data || !data.length) { el.innerHTML = '<div class="empty-state"><div class="empty-icon">👤</div><div>Geen contacten</div></div>'; return; }
-    el.innerHTML = data.map((c,i) => {
-      const init = (c.full_name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-      const col = COLORS[i%COLORS.length];
-      const imp = c.importance||'monitor';
-      const bc = imp==='critical'?'b-urgent':imp==='high'?'b-high':'b-fyi';
-      return `<div class="contact-card">
-        <div class="contact-header">
-          <div class="contact-avatar" style="background:linear-gradient(135deg,${col}88,${col}44)">${init}</div>
-          <div><div class="contact-name">${c.full_name||'—'}</div><div class="contact-company">${c.company||'—'}</div></div>
-          <span class="badge ${bc}" style="margin-left:auto">${imp.toUpperCase()}</span>
-        </div>
-        ${c.email_address?`<div class="contact-role" style="color:var(--accent-blue);margin-top:4px">${c.email_address}</div>`:''}
-        ${c.role_title?`<div class="contact-role">${c.role_title}</div>`:''}
-        ${c.last_contact_at?`<div class="contact-role" style="margin-top:4px">Last contact: ${new Date(c.last_contact_at).toLocaleDateString('nl-BE',{day:'numeric',month:'short',year:'numeric'})}</div>`:''}
-      </div>`;
-    }).join('');
+    allContacts = data || [];
+    renderContacts();
   } catch(e) { document.getElementById('contactsList').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><div>${e.message}</div></div>`; }
+}
+function renderContacts() {
+  const el = document.getElementById('contactsList');
+  if (!allContacts.length) { el.innerHTML = '<div class="empty-state"><div class="empty-icon">👤</div><div>Geen contacten</div></div>'; return; }
+  el.innerHTML = allContacts.map((c,i) => {
+    const init = (c.full_name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    const col = COLORS[i%COLORS.length];
+    const imp = c.importance||'monitor';
+    const bc = imp==='critical'?'b-urgent':imp==='high'?'b-high':'b-fyi';
+    return `<div class="contact-card">
+      <div class="contact-header">
+        <div class="contact-avatar" style="background:linear-gradient(135deg,${col}88,${col}44)">${init}</div>
+        <div><div class="contact-name">${esc(c.full_name)||'—'}</div><div class="contact-company">${esc(c.company)||'—'}</div></div>
+        <span class="badge ${bc}" style="margin-left:auto">${imp.toUpperCase()}</span>
+      </div>
+      ${c.email_address?`<div class="contact-role" style="color:var(--accent-blue)">${esc(c.email_address)}</div>`:''}
+      ${c.role_title?`<div class="contact-role">${esc(c.role_title)}</div>`:''}
+      ${c.last_contact_at?`<div class="contact-role" style="margin-top:4px">Last contact: ${new Date(c.last_contact_at).toLocaleDateString('nl-BE',{day:'numeric',month:'short',year:'numeric'})}</div>`:''}
+      ${c.notes?`<div class="contact-role" style="margin-top:4px;color:var(--muted)">${esc(c.notes)}</div>`:''}
+      <div class="contact-actions">
+        <button class="action-btn" onclick="openEditContactModal('${c.id}')">✏️ Bewerken</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function openEditContactModal(id) {
+  const c = allContacts.find(x => x.id === id); if (!c) return;
+  document.getElementById('modalTitle').textContent = 'Contact bewerken';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="modal-field"><div class="modal-field-label">Naam *</div><input class="modal-input" id="ecName" type="text" value="${esc(c.full_name)||''}"></div>
+    <div class="modal-field"><div class="modal-field-label">Email</div><input class="modal-input" id="ecEmail" type="email" value="${esc(c.email_address)||''}"></div>
+    <div class="modal-field"><div class="modal-field-label">Bedrijf</div><input class="modal-input" id="ecCompany" type="text" value="${esc(c.company)||''}"></div>
+    <div class="modal-field"><div class="modal-field-label">Functie</div><input class="modal-input" id="ecRole" type="text" value="${esc(c.role_title)||''}"></div>
+    <div class="modal-field"><div class="modal-field-label">Belang</div>
+      <select class="modal-select" id="ecImportance">
+        <option value="critical" ${c.importance==='critical'?'selected':''}>Critical</option>
+        <option value="high"     ${c.importance==='high'?'selected':''}>High</option>
+        <option value="monitor"  ${c.importance==='monitor'||!c.importance?'selected':''}>Monitor</option>
+      </select>
+    </div>
+    <div class="modal-field"><div class="modal-field-label">Notities</div><textarea class="modal-textarea" id="ecNotes">${esc(c.notes)||''}</textarea></div>
+  `;
+  document.getElementById('modalActions').innerHTML = `
+    <button class="btn-primary" onclick="saveContact('${id}')">Opslaan</button>
+    <button class="btn-secondary" onclick="closeModal()">Annuleren</button>
+  `;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+async function saveContact(id) {
+  const full_name     = document.getElementById('ecName')?.value?.trim();
+  const email_address = document.getElementById('ecEmail')?.value?.trim() || null;
+  const company       = document.getElementById('ecCompany')?.value?.trim() || null;
+  const role_title    = document.getElementById('ecRole')?.value?.trim() || null;
+  const importance    = document.getElementById('ecImportance')?.value;
+  const notes         = document.getElementById('ecNotes')?.value?.trim() || null;
+  if (!full_name) { alert('Naam is verplicht.'); return; }
+  try {
+    await sb(`contacts?id=eq.${id}`, {method:'PATCH', body:{full_name, email_address, company, role_title, importance, notes}, prefer:'return=minimal'});
+    // Update local state
+    const idx = allContacts.findIndex(c => c.id === id);
+    if (idx >= 0) allContacts[idx] = {...allContacts[idx], full_name, email_address, company, role_title, importance, notes};
+    closeModal(); renderContacts();
+  } catch(e) { alert('Opslaan mislukt: ' + e.message); }
 }
 
 // ── PROJECTS ─────────────────────────────────────
 async function loadProjects() {
   try {
     const data = await sb('projects?select=id,name,description,client_org,status,priority,my_role,deadline,notes&order=priority.asc,name.asc&limit=30');
-    const el = document.getElementById('projectsList');
-    if (!data || !data.length) { el.innerHTML = '<div class="empty-state"><div class="empty-icon">📁</div><div>Geen projecten</div></div>'; return; }
-    el.innerHTML = data.map((p,i) => {
-      const col = COLORS[i%COLORS.length];
-      const prio = (p.priority||'medium').toLowerCase();
-      const bc = prio==='critical'?'b-urgent':prio==='high'?'b-high':'b-medium';
-      return `<div class="project-card">
-        <div class="project-stripe" style="background:${col}"></div>
-        <div class="project-info">
-          <div class="project-name">${p.name||'—'}</div>
-          <div class="project-partner">${p.client_org||''}</div>
-          ${p.my_role?`<div class="project-partner" style="color:var(--accent-blue)">${p.my_role}</div>`:''}
-        </div>
-        <span class="badge ${bc}">${prio.toUpperCase()}</span>
-        <div class="project-deadline"><strong>${p.deadline||'—'}</strong>deadline</div>
-      </div>`;
-    }).join('');
+    allProjects = (data || []).filter(p => p.status !== 'completed');
+    renderProjects();
   } catch(e) { document.getElementById('projectsList').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><div>${e.message}</div></div>`; }
+}
+function renderProjects() {
+  const el = document.getElementById('projectsList');
+  if (!allProjects.length) { el.innerHTML = '<div class="empty-state"><div class="empty-icon">📁</div><div>Geen actieve projecten</div></div>'; return; }
+  el.innerHTML = allProjects.map((p,i) => {
+    const col = COLORS[i%COLORS.length];
+    const prio = (p.priority||'medium').toLowerCase();
+    const bc = prio==='critical'?'b-urgent':prio==='high'?'b-high':'b-medium';
+    return `<div class="project-card">
+      <div class="project-stripe" style="background:${col}"></div>
+      <div class="project-info">
+        <div class="project-name">${esc(p.name)||'—'}</div>
+        <div class="project-partner">${esc(p.client_org)||''}</div>
+        ${p.my_role?`<div class="project-partner" style="color:var(--accent-blue)">${esc(p.my_role)}</div>`:''}
+      </div>
+      <span class="badge ${bc}">${prio.toUpperCase()}</span>
+      <div class="project-deadline"><strong>${p.deadline||'—'}</strong>deadline</div>
+      <div class="project-actions">
+        <button class="action-btn" onclick="openEditProjectModal('${p.id}')">✏️</button>
+        <button class="action-btn del" onclick="closeProject('${p.id}','${esc(p.name)}')">Afsluiten</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function openNewProjectModal() {
+  document.getElementById('modalTitle').textContent = 'Nieuw project aanmaken';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="modal-field"><div class="modal-field-label">Naam *</div><input class="modal-input" id="npName" type="text" placeholder="Projectnaam" autofocus></div>
+    <div class="modal-field"><div class="modal-field-label">Klant / Organisatie</div><input class="modal-input" id="npClient" type="text" placeholder="Klant of organisatie"></div>
+    <div class="modal-field"><div class="modal-field-label">Mijn rol</div><input class="modal-input" id="npRole" type="text" placeholder="Jouw rol in dit project"></div>
+    <div class="modal-field"><div class="modal-field-label">Prioriteit</div>
+      <select class="modal-select" id="npPriority">
+        <option value="medium" selected>Medium</option>
+        <option value="high">High</option>
+        <option value="critical">Critical</option>
+        <option value="low">Low</option>
+      </select>
+    </div>
+    <div class="modal-field"><div class="modal-field-label">Deadline</div><input class="modal-input" id="npDeadline" type="date"></div>
+    <div class="modal-field"><div class="modal-field-label">Omschrijving</div><textarea class="modal-textarea" id="npDesc" placeholder="Korte omschrijving (optioneel)"></textarea></div>
+  `;
+  document.getElementById('modalActions').innerHTML = `<button class="btn-primary" onclick="createProject()">+ Aanmaken</button><button class="btn-secondary" onclick="closeModal()">Annuleren</button>`;
+  document.getElementById('modalOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('npName')?.focus(), 100);
+}
+async function createProject() {
+  const name        = document.getElementById('npName')?.value?.trim();
+  const client_org  = document.getElementById('npClient')?.value?.trim() || null;
+  const my_role     = document.getElementById('npRole')?.value?.trim() || null;
+  const priority    = document.getElementById('npPriority')?.value;
+  const deadline    = document.getElementById('npDeadline')?.value || null;
+  const description = document.getElementById('npDesc')?.value?.trim() || null;
+  if (!name) { alert('Naam is verplicht.'); return; }
+  const payload = { name, client_org, my_role, priority, deadline, description, status:'active' };
+  try {
+    const result = await sb('projects', {method:'POST', body:payload, prefer:'return=representation'});
+    closeModal();
+    allProjects.push(result && result[0] ? result[0] : {id:crypto.randomUUID(), ...payload});
+    renderProjects();
+  } catch(e) { alert('Aanmaken mislukt: ' + e.message); }
+}
+function openEditProjectModal(id) {
+  const p = allProjects.find(x => x.id === id); if (!p) return;
+  document.getElementById('modalTitle').textContent = 'Project bewerken';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="modal-field"><div class="modal-field-label">Naam *</div><input class="modal-input" id="epName" type="text" value="${esc(p.name)||''}"></div>
+    <div class="modal-field"><div class="modal-field-label">Klant / Organisatie</div><input class="modal-input" id="epClient" type="text" value="${esc(p.client_org)||''}"></div>
+    <div class="modal-field"><div class="modal-field-label">Mijn rol</div><input class="modal-input" id="epRole" type="text" value="${esc(p.my_role)||''}"></div>
+    <div class="modal-field"><div class="modal-field-label">Prioriteit</div>
+      <select class="modal-select" id="epPriority">
+        <option value="medium"   ${p.priority==='medium'||!p.priority?'selected':''}>Medium</option>
+        <option value="high"     ${p.priority==='high'?'selected':''}>High</option>
+        <option value="critical" ${p.priority==='critical'?'selected':''}>Critical</option>
+        <option value="low"      ${p.priority==='low'?'selected':''}>Low</option>
+      </select>
+    </div>
+    <div class="modal-field"><div class="modal-field-label">Deadline</div><input class="modal-input" id="epDeadline" type="date" value="${p.deadline||''}"></div>
+    <div class="modal-field"><div class="modal-field-label">Omschrijving</div><textarea class="modal-textarea" id="epDesc">${esc(p.description)||esc(p.notes)||''}</textarea></div>
+  `;
+  document.getElementById('modalActions').innerHTML = `
+    <button class="btn-primary" onclick="saveProject('${id}')">Opslaan</button>
+    <button class="btn-secondary" onclick="closeModal()">Annuleren</button>
+    <button class="btn-danger" onclick="closeProject('${id}','${esc(p.name)}');closeModal()">Afsluiten</button>
+  `;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+async function saveProject(id) {
+  const name        = document.getElementById('epName')?.value?.trim();
+  const client_org  = document.getElementById('epClient')?.value?.trim() || null;
+  const my_role     = document.getElementById('epRole')?.value?.trim() || null;
+  const priority    = document.getElementById('epPriority')?.value;
+  const deadline    = document.getElementById('epDeadline')?.value || null;
+  const description = document.getElementById('epDesc')?.value?.trim() || null;
+  if (!name) { alert('Naam is verplicht.'); return; }
+  try {
+    await sb(`projects?id=eq.${id}`, {method:'PATCH', body:{name, client_org, my_role, priority, deadline, description}, prefer:'return=minimal'});
+    const idx = allProjects.findIndex(p => p.id === id);
+    if (idx >= 0) allProjects[idx] = {...allProjects[idx], name, client_org, my_role, priority, deadline, description};
+    closeModal(); renderProjects();
+  } catch(e) { alert('Opslaan mislukt: ' + e.message); }
+}
+async function closeProject(id, name) {
+  if (!confirm(`Project "${name}" afsluiten?`)) return;
+  try {
+    await sb(`projects?id=eq.${id}`, {method:'PATCH', body:{status:'completed'}, prefer:'return=minimal'});
+    allProjects = allProjects.filter(p => p.id !== id); renderProjects();
+  } catch(e) { alert('Afsluiten mislukt: ' + e.message); }
 }
 
 // ── ASK ───────────────────────────────────────────
 function fillQ(el) { document.getElementById('askInput').value = el.textContent; }
-
 async function sendAsk() {
-  const q = document.getElementById('askInput').value.trim();
-  if (!q) return;
+  const q = document.getElementById('askInput').value.trim(); if (!q) return;
   touchSession();
   document.getElementById('askSuggestions').style.display = 'none';
   chatMessages.push({ role:'user', content:q, time:new Date() });
@@ -1044,13 +1271,9 @@ async function sendAsk() {
   const btn = document.getElementById('askBtn');
   const thinking = document.getElementById('chatThinking');
   btn.disabled = true; thinking.classList.add('visible');
-  const container = document.getElementById('chatMessages');
-  container.scrollTop = container.scrollHeight;
+  document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
   try {
-    const response = await fetch(CONFIG.askWebhook, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ question:q, session_id:chatSessionId })
-    });
+    const response = await fetch(CONFIG.askWebhook, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ question:q, session_id:chatSessionId }) });
     const raw = await response.text();
     let answer;
     try { const json = JSON.parse(raw); answer = json.answer || json.response || json.text || raw; } catch { answer = raw; }
@@ -1069,8 +1292,7 @@ function setPriFilter(val, el) {
   ['fAll','fUrgent','fHigh','fMedium'].forEach(id => document.getElementById(id)?.classList.remove('active'));
   if (el) el.classList.add('active');
   else { const map={urgent:'fUrgent',high:'fHigh',medium:'fMedium',all:'fAll'}; document.getElementById(map[val])?.classList.add('active'); }
-  F.priority = val === 'all' ? null : val;
-  renderItems();
+  F.priority = val === 'all' ? null : val; renderItems();
 }
 function setSrcFilter(val, el) {
   el.classList.toggle('active');
@@ -1091,10 +1313,14 @@ function switchTab(name, el) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
   if (el) el.classList.add('active');
-  const titles = {items:'Priority Feed', tasks:'Tasks', contacts:'Contacts', projects:'Projects', ask:'Ask'};
+  const titles = { items:'Priority Feed', tasks:'Tasks', agenda:'Agenda', contacts:'Contacts', projects:'Projects', ask:'Ask' };
   document.getElementById('pageTitle').innerHTML = titles[name] + ' <span class="topbar-sub" id="pageSub"></span>';
-  if (name === 'items') document.getElementById('pageSub').textContent = allItems.length + ' total';
-  if (name === 'tasks') document.getElementById('pageSub').textContent = allTasks.length + ' taken';
+  const subs = { items: allItems.length+' total', tasks: allTasks.length+' taken', agenda: allEvents.filter(e=>!e.is_cancelled).length+' afspraken', contacts: allContacts.length+' contacten', projects: allProjects.length+' actief', ask:'' };
+  document.getElementById('pageSub').textContent = subs[name] || '';
+  const searchInput = document.getElementById('searchInput');
+  const searchLabels = { items:'Search items...', tasks:'Search tasks...', agenda:'', contacts:'Search contacts...', projects:'Search projects...', ask:'' };
+  searchInput.placeholder = searchLabels[name] || '';
+  searchInput.style.display = (name === 'ask' || name === 'agenda') ? 'none' : '';
   if (name === 'ask') {
     setTimeout(() => {
       document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
