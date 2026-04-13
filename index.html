@@ -648,9 +648,14 @@ function updateStats() {
   document.getElementById('sUrgent').textContent  = src.filter(i => (i.priority||'').toLowerCase() === 'urgent').length;
   document.getElementById('sHigh').textContent    = src.filter(i => (i.priority||'').toLowerCase() === 'high').length;
   document.getElementById('sActions').textContent = src.filter(i => i.action_required === true || i.action_required === 'true').length;
-  document.getElementById('sRecent').textContent  = src.filter(i => (now - new Date(i.received_at || i.created_at).getTime()) < 86400000).length;
-  // Nav badge: total open items
-  const total = allItems.length;
+  document.getElementById('sRecent').textContent  = src.filter(i => {
+    const raw = i.received_at || i.created_at;
+    if (!raw) return false;
+    const dt = new Date(raw);
+    return !isNaN(dt.getTime()) && (now - dt.getTime()) < 86400000;
+  }).length;
+  // Nav badge: urgent count if any, else total
+  const total  = allItems.length;
   const urgent = allItems.filter(i => (i.priority||'').toLowerCase() === 'urgent').length;
   document.getElementById('urgentBadge').textContent = urgent > 0 ? urgent : (total > 0 ? total : '—');
 }
@@ -950,7 +955,7 @@ async function loadEvents() {
     const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 1);
     const data = await sb(
       `events?start_time=gte.${cutoff.toISOString()}` +
-      '&select=id,title,start_time,end_time,location,organizer,is_online,meeting_url,summary,context,ical_uid,is_cancelled,is_all_day' +
+      '&select=id,title,start_time,end_time,location,organizer,is_online,meeting_url,summary,context,ical_uid,is_cancelled' +
       '&order=start_time.asc&limit=100'
     );
     allEvents = data || [];
@@ -1022,7 +1027,8 @@ function renderEvents() {
       const isPastEvent = e.start_time && new Date(e.start_time) < now;
       const isCancelled = e.is_cancelled;
       let timeHtml;
-      if (e.is_all_day) {
+      const isAllDay = !e.start_time || e.start_time.endsWith('T00:00:00') || e.start_time.endsWith('T00:00:00+00:00') || e.start_time.endsWith('T00:00:00Z');
+      if (isAllDay) {
         timeHtml = `<div class="event-time-allday">Hele dag</div>`;
       } else {
         const startStr = e.start_time ? new Date(e.start_time).toLocaleTimeString('nl-BE',{hour:'2-digit',minute:'2-digit'}) : '—';
