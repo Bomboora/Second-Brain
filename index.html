@@ -93,6 +93,7 @@ body::before { content:''; position:fixed; inset:0; background:radial-gradient(e
 .stat-card.s-high { --accent-color:var(--accent-orange); }
 .stat-card.s-actions { --accent-color:var(--accent-blue); }
 .stat-card.s-recent { --accent-color:var(--accent-purple); }
+.stat-card.stat-active { border-color:var(--accent-color, var(--accent-blue)); box-shadow:0 0 0 1px var(--accent-color, var(--accent-blue)); }
 .stat-label { font-size:10px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:12px; }
 .stat-row { display:flex; align-items:flex-end; justify-content:space-between; }
 .stat-number { font-family:'Syne',sans-serif; font-size:36px; font-weight:800; line-height:1; }
@@ -112,6 +113,7 @@ body::before { content:''; position:fixed; inset:0; background:radial-gradient(e
 .filter-chip { padding:6px 14px; border-radius:20px; font-size:12px; font-weight:500; border:1px solid var(--border); background:transparent; color:var(--muted); cursor:pointer; transition:all 0.15s; font-family:'DM Sans',sans-serif; }
 .filter-chip:hover { border-color:var(--border-active); color:var(--text); }
 .filter-chip.active { background:rgba(245,166,35,0.1); border-color:rgba(245,166,35,0.3); color:var(--accent-orange); }
+.filter-chip.active-purple { background:rgba(167,139,250,0.1); border-color:rgba(167,139,250,0.3); color:var(--accent-purple); }
 .filter-sep { width:1px; height:20px; background:var(--border); }
 
 /* ITEM CARDS */
@@ -376,12 +378,12 @@ const CONFIG = {
     <!-- CONTEXT FILTER BAR -->
     <div class="ctx-filter-bar">
       <span class="ctx-filter-label">Context</span>
-      <button class="ctx-chip active" data-ctx="all"           onclick="setCtxFilter('all',this)">Alles</button>
-      <button class="ctx-chip"        data-ctx="superellipse"  onclick="setCtxFilter('superellipse',this)">Superellipse</button>
+      <button class="ctx-chip active" data-ctx="all"            onclick="setCtxFilter('all',this)">Alles</button>
+      <button class="ctx-chip"        data-ctx="superellipse"   onclick="setCtxFilter('superellipse',this)">Superellipse</button>
       <button class="ctx-chip"        data-ctx="little_nirvana" onclick="setCtxFilter('little_nirvana',this)">Little Nirvana</button>
       <button class="ctx-chip"        data-ctx="quantum_design" onclick="setCtxFilter('quantum_design',this)">Quantum Design</button>
-      <button class="ctx-chip"        data-ctx="prive"         onclick="setCtxFilter('prive',this)">Privé</button>
-      <button class="ctx-chip"        data-ctx="algemeen"      onclick="setCtxFilter('algemeen',this)">Algemeen</button>
+      <button class="ctx-chip"        data-ctx="prive"          onclick="setCtxFilter('prive',this)">Privé</button>
+      <button class="ctx-chip"        data-ctx="algemeen"       onclick="setCtxFilter('algemeen',this)">Algemeen</button>
     </div>
 
     <div class="content">
@@ -391,19 +393,19 @@ const CONFIG = {
         <div class="insight-label">Status Overview</div>
         <div class="insight-title">Curator Insight</div>
         <div class="stats-grid">
-          <div class="stat-card s-urgent" onclick="setPriFilter('urgent',null)">
+          <div class="stat-card s-urgent" id="sc-urgent" onclick="setStatFilter('urgent')">
             <div class="stat-label">Urgent</div>
             <div class="stat-row"><div class="stat-number" id="sUrgent">—</div><div class="stat-icon">!</div></div>
           </div>
-          <div class="stat-card s-high" onclick="setPriFilter('high',null)">
+          <div class="stat-card s-high" id="sc-high" onclick="setStatFilter('high')">
             <div class="stat-label">High Priority</div>
             <div class="stat-row"><div class="stat-number" id="sHigh">—</div><div class="stat-icon">⚡</div></div>
           </div>
-          <div class="stat-card s-actions" onclick="setActFilter(null)">
+          <div class="stat-card s-actions" id="sc-actions" onclick="setStatFilter('actions')">
             <div class="stat-label">Actions</div>
             <div class="stat-row"><div class="stat-number" id="sActions">—</div><div class="stat-icon">↗</div></div>
           </div>
-          <div class="stat-card s-recent">
+          <div class="stat-card s-recent" id="sc-recent" onclick="setStatFilter('recent')">
             <div class="stat-label">Recent (24h)</div>
             <div class="stat-row"><div class="stat-number" id="sRecent">—</div><div class="stat-icon">◷</div></div>
           </div>
@@ -422,6 +424,7 @@ const CONFIG = {
           <button class="filter-chip" id="fTelegram" onclick="setSrcFilter('telegram',this)">Telegram</button>
           <div class="filter-sep"></div>
           <button class="filter-chip" id="fAction" onclick="setActFilter(this)">Action required</button>
+          <button class="filter-chip" id="fRecent" onclick="setPriFilter('all',document.getElementById('fAll'));setRecentFilter()" style="display:none">◷ Recent (24h) ✕</button>
         </div>
         <div class="items-list" id="itemsList">
           <div class="loading-state"><div class="spinner"></div>Loading items...</div>
@@ -509,7 +512,9 @@ let allProjects = [];
 let taskWeekOnly = false;
 let agendaShowCancelled = false;
 let G_CTX = null;
-let F = { priority: null, source: null, action: false, search: '' };
+
+// FIX: F object now includes 'recent' flag
+let F = { priority: null, source: null, action: false, search: '', recent: false };
 
 const COLORS = ['#f5a623','#4b9eff','#a78bfa','#3dd68c','#ff6b6b','#f093fb'];
 const CTX_ORDER  = ['superellipse','little_nirvana','quantum_design','prive','algemeen'];
@@ -598,19 +603,27 @@ async function sb(path, opts = {}) {
   return t ? JSON.parse(t) : null;
 }
 
-// ── INIT ────────────────────────────────────────
-async function loadAll() {
-  await Promise.all([loadItems(), loadTasks(), loadEvents(), loadContacts(), loadProjects()]);
-  initChatSession();
+// ── CONTEXT FILTER — FIX: localStorage persist ──
+function initCtxFilter() {
+  const saved = localStorage.getItem('sb_ctx') || 'all';
+  G_CTX = saved === 'all' ? null : saved;
+  document.querySelectorAll('.ctx-chip').forEach(c => c.classList.remove('active'));
+  const chip = document.querySelector(`.ctx-chip[data-ctx="${saved}"]`);
+  if (chip) chip.classList.add('active');
+  else document.querySelector('.ctx-chip[data-ctx="all"]')?.classList.add('active');
 }
 
-// ── CONTEXT FILTER ───────────────────────────────
 function setCtxFilter(ctx, el) {
   G_CTX = (ctx === 'all') ? null : ctx;
+  // FIX: persist to localStorage
+  localStorage.setItem('sb_ctx', ctx);
   document.querySelectorAll('.ctx-chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
+  // FIX: update stats when context changes
+  updateStats();
   renderCurrentTab();
 }
+
 function renderCurrentTab() {
   const active = document.querySelector('.tab-content.active');
   if (!active) return;
@@ -619,9 +632,16 @@ function renderCurrentTab() {
   if (id === 'tab-tasks')   renderTasks();
   if (id === 'tab-agenda')  renderEvents();
 }
+
 function matchCtx(item) {
   if (!G_CTX) return true;
   return (item.context || 'algemeen').toLowerCase() === G_CTX;
+}
+
+// ── INIT ────────────────────────────────────────
+async function loadAll() {
+  await Promise.all([loadItems(), loadTasks(), loadEvents(), loadContacts(), loadProjects()]);
+  initChatSession();
 }
 
 // ── ITEMS ───────────────────────────────────────
@@ -632,7 +652,7 @@ async function loadItems() {
       'items?deleted=is.false' +
       '&or=(status.is.null,status.not.in.(done,snoozed))' +
       '&select=id,title,summary,priority,status,source,category,relevance_score,action_required,action_description,due_date,sender_name,created_at,received_at,context' +
-      '&order=relevance_score.desc.nullslast,created_at.desc&limit=150'
+      '&order=relevance_score.desc.nullslast,created_at.desc&limit=300'
     );
     allItems = data || [];
     updateStats();
@@ -642,30 +662,45 @@ async function loadItems() {
   }
 }
 
+// FIX: updateStats now respects context filter correctly and counts recent properly
 function updateStats() {
   const now = Date.now();
   const src = G_CTX ? allItems.filter(matchCtx) : allItems;
-  document.getElementById('sUrgent').textContent  = src.filter(i => (i.priority||'').toLowerCase() === 'urgent').length;
-  document.getElementById('sHigh').textContent    = src.filter(i => (i.priority||'').toLowerCase() === 'high').length;
-  document.getElementById('sActions').textContent = src.filter(i => i.action_required === true || i.action_required === 'true').length;
-  document.getElementById('sRecent').textContent  = src.filter(i => {
+
+  const urgentCount  = src.filter(i => (i.priority||'').toLowerCase() === 'urgent').length;
+  const highCount    = src.filter(i => (i.priority||'').toLowerCase() === 'high').length;
+  const actionsCount = src.filter(i => i.action_required === true || i.action_required === 'true').length;
+  const recentCount  = src.filter(i => {
     const raw = i.received_at || i.created_at;
     if (!raw) return false;
     const dt = new Date(raw);
     return !isNaN(dt.getTime()) && (now - dt.getTime()) < 86400000;
   }).length;
+
+  document.getElementById('sUrgent').textContent  = urgentCount;
+  document.getElementById('sHigh').textContent    = highCount;
+  document.getElementById('sActions').textContent = actionsCount;
+  document.getElementById('sRecent').textContent  = recentCount;
+
   // Nav badge: urgent count if any, else total
-  const total  = allItems.length;
-  const urgent = allItems.filter(i => (i.priority||'').toLowerCase() === 'urgent').length;
-  document.getElementById('urgentBadge').textContent = urgent > 0 ? urgent : (total > 0 ? total : '—');
+  const urgent = src.filter(i => (i.priority||'').toLowerCase() === 'urgent').length;
+  document.getElementById('urgentBadge').textContent = urgent > 0 ? urgent : (src.length > 0 ? src.length : '—');
 }
 
+// FIX: filtered() now includes recent filter + uses consistent logic with updateStats
 function filtered() {
+  const now = Date.now();
   return allItems.filter(i => {
     if (!matchCtx(i)) return false;
     if (F.priority && F.priority !== 'all' && (i.priority||'').toLowerCase() !== F.priority) return false;
     if (F.source && (i.source||'').toLowerCase() !== F.source) return false;
     if (F.action && i.action_required !== true && i.action_required !== 'true') return false;
+    if (F.recent) {
+      const raw = i.received_at || i.created_at;
+      if (!raw) return false;
+      const dt = new Date(raw);
+      if (isNaN(dt.getTime()) || (now - dt.getTime()) >= 86400000) return false;
+    }
     if (F.search) {
       const q = F.search.toLowerCase();
       if (!(i.title||'').toLowerCase().includes(q) && !(i.summary||'').toLowerCase().includes(q)) return false;
@@ -725,6 +760,60 @@ function renderItems() {
     </div>`;
   }).join('');
   window._renderedItems = items;
+}
+
+// ── STAT CARD FILTER — FIX: unified handler that resets all other filters ──
+function setStatFilter(type) {
+  // Reset everything first so stat count always matches feed count
+  F = { priority: null, source: null, action: false, search: '', recent: false };
+  document.getElementById('searchInput').value = '';
+  resetFilterChipsUI();
+
+  if (type === 'urgent') {
+    F.priority = 'urgent';
+    document.getElementById('fUrgent')?.classList.add('active');
+    document.getElementById('fAll')?.classList.remove('active');
+  } else if (type === 'high') {
+    F.priority = 'high';
+    document.getElementById('fHigh')?.classList.add('active');
+    document.getElementById('fAll')?.classList.remove('active');
+  } else if (type === 'actions') {
+    F.action = true;
+    document.getElementById('fAction')?.classList.add('active');
+  } else if (type === 'recent') {
+    F.recent = true;
+    document.getElementById('fRecent').style.display = '';
+    document.getElementById('fRecent')?.classList.add('active-purple');
+  }
+
+  // Highlight active stat card
+  ['sc-urgent','sc-high','sc-actions','sc-recent'].forEach(id => document.getElementById(id)?.classList.remove('stat-active'));
+  document.getElementById('sc-'+type)?.classList.add('stat-active');
+
+  renderItems();
+}
+
+function resetFilterChipsUI() {
+  ['fAll','fUrgent','fHigh','fMedium'].forEach(id => document.getElementById(id)?.classList.remove('active'));
+  document.getElementById('fAll')?.classList.add('active');
+  document.getElementById('fAction')?.classList.remove('active');
+  ['fEmail','fTelegram'].forEach(id => document.getElementById(id)?.classList.remove('active'));
+  document.getElementById('fRecent').style.display = 'none';
+  document.getElementById('fRecent')?.classList.remove('active-purple');
+  ['sc-urgent','sc-high','sc-actions','sc-recent'].forEach(id => document.getElementById(id)?.classList.remove('stat-active'));
+}
+
+// FIX: setRecentFilter — toggle off if already active
+function setRecentFilter() {
+  if (F.recent) {
+    F.recent = false;
+    document.getElementById('fRecent').style.display = 'none';
+    document.getElementById('fRecent')?.classList.remove('active-purple');
+    document.getElementById('sc-recent')?.classList.remove('stat-active');
+    renderItems();
+  } else {
+    setStatFilter('recent');
+  }
 }
 
 // ── ITEM MODAL ────────────────────────────────────
@@ -991,7 +1080,6 @@ function renderEvents() {
     return;
   }
 
-  // Group by day
   const groups = {};
   const today = todayStr();
   const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
@@ -1142,7 +1230,6 @@ async function saveContact(id) {
   if (!full_name) { alert('Naam is verplicht.'); return; }
   try {
     await sb(`contacts?id=eq.${id}`, {method:'PATCH', body:{full_name, email_address, company, role_title, importance, notes}, prefer:'return=minimal'});
-    // Update local state
     const idx = allContacts.findIndex(c => c.id === id);
     if (idx >= 0) allContacts[idx] = {...allContacts[idx], full_name, email_address, company, role_title, importance, notes};
     closeModal(); renderContacts();
@@ -1294,23 +1381,37 @@ async function sendAsk() {
 }
 
 // ── FILTERS ───────────────────────────────────────
+// FIX: setPriFilter clears recent flag and resets action/source to keep stats in sync
 function setPriFilter(val, el) {
-  ['fAll','fUrgent','fHigh','fMedium'].forEach(id => document.getElementById(id)?.classList.remove('active'));
+  F.recent = false;
+  resetFilterChipsUI();
   if (el) el.classList.add('active');
   else { const map={urgent:'fUrgent',high:'fHigh',medium:'fMedium',all:'fAll'}; document.getElementById(map[val])?.classList.add('active'); }
-  F.priority = val === 'all' ? null : val; renderItems();
+  F.priority = val === 'all' ? null : val;
+  renderItems();
 }
+
+// FIX: setSrcFilter clears recent flag
 function setSrcFilter(val, el) {
+  F.recent = false;
+  document.getElementById('fRecent').style.display = 'none';
+  document.getElementById('sc-recent')?.classList.remove('stat-active');
   el.classList.toggle('active');
   F.source = el.classList.contains('active') ? val : null;
   ['fEmail','fTelegram'].forEach(id => { if (document.getElementById(id) !== el) document.getElementById(id)?.classList.remove('active'); });
   if (!el.classList.contains('active')) F.source = null;
   renderItems();
 }
+
+// FIX: setActFilter clears recent flag
 function setActFilter(el) {
+  F.recent = false;
+  document.getElementById('fRecent').style.display = 'none';
+  document.getElementById('sc-recent')?.classList.remove('stat-active');
   const btn = el || document.getElementById('fAction');
   btn.classList.toggle('active'); F.action = btn.classList.contains('active'); renderItems();
 }
+
 function onSearch() { F.search = document.getElementById('searchInput').value; renderItems(); }
 
 // ── TABS ──────────────────────────────────────────
@@ -1336,6 +1437,8 @@ function switchTab(name, el) {
 }
 
 // ── START ─────────────────────────────────────────
+// FIX: init context filter from localStorage before loading data
+initCtxFilter();
 loadAll();
 </script>
 </body>
