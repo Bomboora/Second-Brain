@@ -324,7 +324,7 @@ body::before { content:''; position:fixed; inset:0; background:radial-gradient(e
 const CONFIG = {
   supabaseUrl: 'https://lnupagxyhlbnhivsrvlg.supabase.co',
   supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxudXBhZ3h5aGxibmhpdnNydmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNzI0NjIsImV4cCI6MjA4ODc0ODQ2Mn0.3BkUalPRqw5i4_igl1mNtX2ID4_zZk67wNMmFnPp8mQ',
-  askWebhook:  'https://hook.eu2.make.com/3vjh4j3pfuab2a2p3vfvr2bwftv7hcik'
+  askEndpoint: 'https://lnupagxyhlbnhivsrvlg.supabase.co/functions/v1/ask-v2'
 };
 </script>
 
@@ -1366,7 +1366,15 @@ async function sendAsk() {
   btn.disabled = true; thinking.classList.add('visible');
   document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
   try {
-    const response = await fetch(CONFIG.askWebhook, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ question:q, session_id:chatSessionId }) });
+    const response = await fetch(CONFIG.askEndpoint, {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization':'Bearer ' + CONFIG.supabaseKey,
+        'apikey': CONFIG.supabaseKey
+      },
+      body: JSON.stringify({ question:q, session_id:chatSessionId, mode:'full' })
+    });
     const raw = await response.text();
     let answer;
     try { const json = JSON.parse(raw); answer = json.answer || json.response || json.text || raw; } catch { answer = raw; }
