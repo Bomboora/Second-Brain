@@ -970,6 +970,8 @@ async function markTaskDone(id) {
   try {
     await sb(`items?id=eq.${id}`, {method:'PATCH', body:{status:'done', completed:true}, prefer:'return=minimal'});
     allTasks = allTasks.filter(t => t.id !== id); updateTasksBadge();
+    // FIX afvink-bug: item ook uit allItems verwijderen zodat Actions-teller en feed meteen kloppen
+    removeItem(id);
     setTimeout(() => renderTasks(), 600);
   } catch(e) {
     if (card) { card.classList.remove('is-done'); card.querySelector('.task-chk').classList.remove('checked'); card.querySelector('.task-chk').textContent = ''; }
@@ -1011,7 +1013,6 @@ function openNewTaskModal() {
   document.getElementById('modalBody').innerHTML = `
     <div class="modal-field"><div class="modal-field-label">Titel *</div><input class="modal-input" id="ntTitle" type="text" placeholder="Wat moet er gedaan worden?" autofocus></div>
     <div class="modal-field"><div class="modal-field-label">Context *</div><select class="modal-select" id="ntContext"><option value="superellipse">Superellipse</option><option value="little_nirvana">Little Nirvana</option><option value="quantum_design">Quantum Design</option><option value="prive">Privé</option><option value="algemeen">Algemeen</option></select></div>
-    <div class="modal-field"><div class="modal-field-label">Project</div><input class="modal-input" id="ntProject" type="text" placeholder="Projectnaam (optioneel)"></div>
     <div class="modal-field"><div class="modal-field-label">Prioriteit</div><select class="modal-select" id="ntPriority"><option value="Normal" selected>Normal</option><option value="High">High</option><option value="Urgent">Urgent</option></select></div>
     <div class="modal-field"><div class="modal-field-label">Deadline</div><input class="modal-input" id="ntDeadline" type="date"></div>
     <div class="modal-field"><div class="modal-field-label">Omschrijving</div><textarea class="modal-textarea" id="ntDesc" placeholder="Extra toelichting (optioneel)"></textarea></div>
@@ -1023,16 +1024,16 @@ function openNewTaskModal() {
 async function createTask() {
   const title    = document.getElementById('ntTitle')?.value?.trim();
   const context  = document.getElementById('ntContext')?.value;
-  const project  = document.getElementById('ntProject')?.value?.trim() || null;
   const priority = document.getElementById('ntPriority')?.value;
   const deadline = document.getElementById('ntDeadline')?.value || null;
   const desc     = document.getElementById('ntDesc')?.value?.trim() || null;
   if (!title) { alert('Titel is verplicht.'); return; }
-  const payload = { title, category:'Task', action_required:true, action_description:desc, priority, due_date:deadline, context, project_name:project, source:'dashboard', status:'open', deleted:false };
+  // FIX PGRST204: project_name bestaat niet meer op items (entities-transitie) — veld verwijderd uit payload
+  const payload = { title, category:'Task', action_required:true, action_description:desc, priority, due_date:deadline, context, source:'dashboard', status:'open', deleted:false };
   try {
     const result = await sb('items', {method:'POST', body:payload, prefer:'return=representation'});
     closeModal();
-    allTasks.push(result && result[0] ? {...result[0], project_name:project} : {id:crypto.randomUUID(),...payload});
+    allTasks.push(result && result[0] ? {...result[0], project_name:null} : {id:crypto.randomUUID(),...payload,project_name:null});
     updateTasksBadge(); renderTasks();
   } catch(e) { alert('Aanmaken mislukt: ' + e.message); }
 }
@@ -1229,7 +1230,9 @@ async function saveContact(id) {
   const notes         = document.getElementById('ecNotes')?.value?.trim() || null;
   if (!full_name) { alert('Naam is verplicht.'); return; }
   try {
-    await sb(`contacts?id=eq.${id}`, {method:'PATCH', body:{full_name, email_address, company, role_title, importance, notes}, prefer:'return=minimal'});
+    // FIX: return=representation i.p.v. return=minimal — met return=minimal voert PostgREST
+    // de INSTEAD OF-trigger op de contacts-view niet uit (204 zonder werkelijke write)
+    await sb(`contacts?id=eq.${id}`, {method:'PATCH', body:{full_name, email_address, company, role_title, importance, notes}, prefer:'return=representation'});
     const idx = allContacts.findIndex(c => c.id === id);
     if (idx >= 0) allContacts[idx] = {...allContacts[idx], full_name, email_address, company, role_title, importance, notes};
     closeModal(); renderContacts();
