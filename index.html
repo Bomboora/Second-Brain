@@ -841,7 +841,7 @@ function closeModal() { document.getElementById('modalOverlay').classList.remove
 
 // ── ITEM ACTIONS ─────────────────────────────────
 async function markDone(id) {
-  try { await sb(`items?id=eq.${id}`,{method:'PATCH',body:{status:'done',completed:true},prefer:'return=minimal'}); removeItem(id); } catch(e){alert(e.message);}
+  try { await sb(`items?id=eq.${id}`,{method:'PATCH',body:{status:'done',completed:true,action_required:false},prefer:'return=minimal'}); removeItem(id); } catch(e){alert(e.message);}
 }
 async function snooze(id) {
   try { await sb(`items?id=eq.${id}`,{method:'PATCH',body:{status:'snoozed'},prefer:'return=minimal'}); removeItem(id); } catch(e){alert(e.message);}
@@ -968,7 +968,7 @@ async function markTaskDone(id) {
   const card = document.getElementById('tc-'+id);
   if (card) { card.classList.add('is-done'); card.querySelector('.task-chk').classList.add('checked'); card.querySelector('.task-chk').textContent = '✓'; }
   try {
-    await sb(`items?id=eq.${id}`, {method:'PATCH', body:{status:'done', completed:true}, prefer:'return=minimal'});
+    await sb(`items?id=eq.${id}`, {method:'PATCH', body:{status:'done', completed:true, action_required:false}, prefer:'return=minimal'});
     allTasks = allTasks.filter(t => t.id !== id); updateTasksBadge();
     // FIX afvink-bug: item ook uit allItems verwijderen zodat Actions-teller en feed meteen kloppen
     removeItem(id);
