@@ -72,7 +72,7 @@ body::before { content:''; position:fixed; inset:0; background:radial-gradient(e
 .ctx-chip.active { color:white; border-color:transparent; }
 .ctx-chip[data-ctx="all"].active { background:rgba(255,255,255,0.1); color:var(--text); border-color:var(--border-active); }
 .ctx-chip[data-ctx="superellipse"].active { background:rgba(75,158,255,0.15); border-color:rgba(75,158,255,0.35); color:#7bb8ff; }
-.ctx-chip[data-ctx="little_nirvana"].active { background:rgba(61,214,140,0.15); border-color:rgba(61,214,140,0.35); color:#3dd68c; }
+.ctx-chip[data-ctx="zennzibar"].active { background:rgba(61,214,140,0.15); border-color:rgba(61,214,140,0.35); color:#3dd68c; }
 .ctx-chip[data-ctx="quantum_design"].active { background:rgba(167,139,250,0.15); border-color:rgba(167,139,250,0.35); color:#c4b5fd; }
 .ctx-chip[data-ctx="prive"].active { background:rgba(245,166,35,0.15); border-color:rgba(245,166,35,0.35); color:var(--accent-orange); }
 .ctx-chip[data-ctx="algemeen"].active { background:rgba(90,100,120,0.2); border-color:rgba(90,100,120,0.4); color:var(--muted); }
@@ -307,6 +307,37 @@ body::before { content:''; position:fixed; inset:0; background:radial-gradient(e
 .btn-danger { padding:9px 18px; background:rgba(255,77,77,0.1); color:var(--accent-red); border:1px solid rgba(255,77,77,0.2); border-radius:9px; font-size:13px; cursor:pointer; margin-left:auto; font-family:'DM Sans',sans-serif; }
 .btn-warn { padding:9px 18px; background:rgba(245,166,35,0.1); color:var(--accent-orange); border:1px solid rgba(245,166,35,0.2); border-radius:9px; font-size:13px; cursor:pointer; font-family:'DM Sans',sans-serif; }
 
+/* REVIEW */
+.review-intro { font-size:13px; color:var(--muted); line-height:1.6; margin-bottom:20px; max-width:760px; }
+.review-list { display:flex; flex-direction:column; gap:12px; margin-bottom:36px; }
+.review-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:18px 20px; transition:all 0.2s; animation:fadeIn 0.25s ease both; }
+.review-card:hover { border-color:var(--border-active); }
+.review-card.is-leaving { opacity:0; transform:translateX(12px); transition:all 0.35s ease; }
+.review-top { display:flex; align-items:center; gap:8px; margin-bottom:10px; flex-wrap:wrap; }
+.review-ctx { font-size:12px; color:var(--muted); display:flex; align-items:center; gap:6px; }
+.review-ctx-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.review-conf { margin-left:auto; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; background:rgba(245,166,35,0.12); color:var(--accent-orange); border:1px solid rgba(245,166,35,0.2); white-space:nowrap; }
+.review-title { font-family:'Syne',sans-serif; font-size:15px; font-weight:600; line-height:1.3; margin-bottom:4px; }
+.review-action { font-size:12px; color:var(--muted); line-height:1.5; margin-bottom:12px; }
+.review-evidence { background:var(--bg); border:1px solid var(--border); border-left:2px solid var(--accent-green); border-radius:10px; padding:12px 14px; margin-bottom:14px; }
+.review-ev-label { font-size:10px; font-weight:600; letter-spacing:1.2px; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+.review-ev-item { font-size:13px; color:var(--text); font-weight:500; margin-bottom:6px; line-height:1.4; }
+.review-ev-item span { color:var(--muted); font-weight:400; }
+.review-quote { font-size:12px; color:var(--text); font-style:italic; line-height:1.55; margin-bottom:6px; opacity:0.9; }
+.review-reason { font-size:12px; color:var(--muted); line-height:1.5; }
+.review-buttons { display:flex; gap:8px; flex-wrap:wrap; }
+.review-btn { padding:8px 16px; border-radius:9px; font-size:12px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.15s; }
+.review-btn.confirm { background:rgba(61,214,140,0.12); color:var(--accent-green); border:1px solid rgba(61,214,140,0.3); }
+.review-btn.confirm:hover { background:rgba(61,214,140,0.2); }
+.review-btn.keep { background:transparent; color:var(--muted); border:1px solid var(--border); }
+.review-btn.keep:hover { border-color:var(--border-active); color:var(--text); }
+.review-btn:disabled { opacity:0.5; cursor:not-allowed; }
+.closure-row { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:12px 16px; display:flex; align-items:flex-start; gap:12px; margin-bottom:6px; }
+.closure-body { flex:1; min-width:0; }
+.closure-title { font-size:13px; color:var(--text); line-height:1.4; }
+.closure-meta { font-size:11px; color:var(--muted); margin-top:3px; line-height:1.5; }
+.closure-row .action-btn { flex-shrink:0; }
+
 /* UTIL */
 .loading-state { display:flex; align-items:center; justify-content:center; gap:12px; padding:60px; color:var(--muted); font-size:14px; }
 .spinner { width:18px; height:18px; border:2px solid var(--border); border-top-color:var(--accent-orange); border-radius:50%; animation:spin 0.7s linear infinite; }
@@ -353,6 +384,7 @@ const CONFIG = {
       <div class="nav-item" onclick="switchTab('contacts',this)"><span class="nav-icon">👤</span>Contacts</div>
       <div class="nav-item" onclick="switchTab('projects',this)"><span class="nav-icon">📁</span>Projects</div>
       <div class="nav-section" style="margin-top:12px">Intelligence</div>
+      <div class="nav-item" onclick="switchTab('review',this)"><span class="nav-icon">◎</span>Review<span class="nav-badge orange" id="reviewBadge">0</span></div>
       <div class="nav-item" onclick="switchTab('ask',this)"><span class="nav-icon">✦</span>Ask</div>
     </nav>
     <div class="sidebar-footer">
@@ -360,7 +392,7 @@ const CONFIG = {
         <div class="user-avatar">JO</div>
         <div>
           <div class="user-name">Jürgen Oskamp</div>
-          <div class="user-role">Superellipse · LN</div>
+          <div class="user-role">Superellipse · Zennzibar</div>
         </div>
         <div class="pulse-dot"></div>
       </div>
@@ -380,7 +412,7 @@ const CONFIG = {
       <span class="ctx-filter-label">Context</span>
       <button class="ctx-chip active" data-ctx="all"            onclick="setCtxFilter('all',this)">Alles</button>
       <button class="ctx-chip"        data-ctx="superellipse"   onclick="setCtxFilter('superellipse',this)">Superellipse</button>
-      <button class="ctx-chip"        data-ctx="little_nirvana" onclick="setCtxFilter('little_nirvana',this)">Little Nirvana</button>
+      <button class="ctx-chip"        data-ctx="zennzibar"      onclick="setCtxFilter('zennzibar',this)">Zennzibar</button>
       <button class="ctx-chip"        data-ctx="quantum_design" onclick="setCtxFilter('quantum_design',this)">Quantum Design</button>
       <button class="ctx-chip"        data-ctx="prive"          onclick="setCtxFilter('prive',this)">Privé</button>
       <button class="ctx-chip"        data-ctx="algemeen"       onclick="setCtxFilter('algemeen',this)">Algemeen</button>
@@ -472,6 +504,24 @@ const CONFIG = {
         <div class="projects-list" id="projectsList"><div class="loading-state"><div class="spinner"></div>Loading...</div></div>
       </div>
 
+      <!-- REVIEW TAB -->
+      <div class="tab-content" id="tab-review">
+        <div class="insight-label">Open loops</div>
+        <div class="insight-title">Review</div>
+        <div class="review-intro">Het systeem vond voor deze open items een later bericht dat ze mogelijk afsluit, maar is niet zeker genoeg om het zelf te doen. Bevestig om het item af te sluiten, of laat het open.</div>
+        <div class="section-header">
+          <div class="section-title">Ter bevestiging</div>
+          <span class="section-count" id="reviewCount"></span>
+        </div>
+        <div class="review-list" id="reviewList"><div class="loading-state"><div class="spinner"></div>Voorstellen laden...</div></div>
+        <div class="section-header">
+          <div class="section-title">Automatisch afgesloten</div>
+          <span class="section-count" id="closureCount"></span>
+        </div>
+        <div class="review-intro">Items die het systeem de laatste 14 dagen zelf afsloot, of die jij bevestigde. Klopt er een niet, heropen het dan.</div>
+        <div id="closureList"><div class="loading-state"><div class="spinner"></div>Laden...</div></div>
+      </div>
+
       <!-- ASK TAB -->
       <div class="tab-content" id="tab-ask">
         <div class="insight-label">Intelligence Layer</div>
@@ -509,6 +559,8 @@ let allTasks    = [];
 let allEvents   = [];
 let allContacts = [];
 let allProjects = [];
+let allReviews  = [];
+let allClosures = [];
 let taskWeekOnly = false;
 let agendaShowCancelled = false;
 let G_CTX = null;
@@ -517,9 +569,9 @@ let G_CTX = null;
 let F = { priority: null, source: null, action: false, search: '', recent: false };
 
 const COLORS = ['#f5a623','#4b9eff','#a78bfa','#3dd68c','#ff6b6b','#f093fb'];
-const CTX_ORDER  = ['superellipse','little_nirvana','quantum_design','prive','algemeen'];
-const CTX_LABELS = { superellipse:'Superellipse', little_nirvana:'Little Nirvana', quantum_design:'Quantum Design', prive:'Privé', algemeen:'Algemeen' };
-const CTX_COLORS = { superellipse:'#4b9eff', little_nirvana:'#3dd68c', quantum_design:'#a78bfa', prive:'#f5a623', algemeen:'#5a6478' };
+const CTX_ORDER  = ['superellipse','zennzibar','quantum_design','prive','algemeen'];
+const CTX_LABELS = { superellipse:'Superellipse', zennzibar:'Zennzibar', quantum_design:'Quantum Design', prive:'Privé', algemeen:'Algemeen' };
+const CTX_COLORS = { superellipse:'#4b9eff', zennzibar:'#3dd68c', quantum_design:'#a78bfa', prive:'#f5a623', algemeen:'#5a6478' };
 const PRIO_CYCLE  = ['urgent','high','normal'];
 const PRIO_LABELS = { urgent:'Urgent', high:'High', normal:'Normal' };
 const MONTHS = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
@@ -605,7 +657,9 @@ async function sb(path, opts = {}) {
 
 // ── CONTEXT FILTER — FIX: localStorage persist ──
 function initCtxFilter() {
-  const saved = localStorage.getItem('sb_ctx') || 'all';
+  let saved = localStorage.getItem('sb_ctx') || 'all';
+  // little_nirvana is hernoemd naar zennzibar
+  if (saved === 'little_nirvana') { saved = 'zennzibar'; localStorage.setItem('sb_ctx', saved); }
   G_CTX = saved === 'all' ? null : saved;
   document.querySelectorAll('.ctx-chip').forEach(c => c.classList.remove('active'));
   const chip = document.querySelector(`.ctx-chip[data-ctx="${saved}"]`);
@@ -631,6 +685,7 @@ function renderCurrentTab() {
   if (id === 'tab-items')   renderItems();
   if (id === 'tab-tasks')   renderTasks();
   if (id === 'tab-agenda')  renderEvents();
+  if (id === 'tab-review')  renderReviews();
 }
 
 function matchCtx(item) {
@@ -640,7 +695,7 @@ function matchCtx(item) {
 
 // ── INIT ────────────────────────────────────────
 async function loadAll() {
-  await Promise.all([loadItems(), loadTasks(), loadEvents(), loadContacts(), loadProjects()]);
+  await Promise.all([loadItems(), loadTasks(), loadEvents(), loadContacts(), loadProjects(), loadReviews()]);
   initChatSession();
 }
 
@@ -1012,7 +1067,7 @@ function openNewTaskModal() {
   document.getElementById('modalTitle').textContent = 'Nieuwe taak aanmaken';
   document.getElementById('modalBody').innerHTML = `
     <div class="modal-field"><div class="modal-field-label">Titel *</div><input class="modal-input" id="ntTitle" type="text" placeholder="Wat moet er gedaan worden?" autofocus></div>
-    <div class="modal-field"><div class="modal-field-label">Context *</div><select class="modal-select" id="ntContext"><option value="superellipse">Superellipse</option><option value="little_nirvana">Little Nirvana</option><option value="quantum_design">Quantum Design</option><option value="prive">Privé</option><option value="algemeen">Algemeen</option></select></div>
+    <div class="modal-field"><div class="modal-field-label">Context *</div><select class="modal-select" id="ntContext"><option value="superellipse">Superellipse</option><option value="zennzibar">Zennzibar</option><option value="quantum_design">Quantum Design</option><option value="prive">Privé</option><option value="algemeen">Algemeen</option></select></div>
     <div class="modal-field"><div class="modal-field-label">Prioriteit</div><select class="modal-select" id="ntPriority"><option value="Normal" selected>Normal</option><option value="High">High</option><option value="Urgent">Urgent</option></select></div>
     <div class="modal-field"><div class="modal-field-label">Deadline</div><input class="modal-input" id="ntDeadline" type="date"></div>
     <div class="modal-field"><div class="modal-field-label">Omschrijving</div><textarea class="modal-textarea" id="ntDesc" placeholder="Extra toelichting (optioneel)"></textarea></div>
@@ -1355,6 +1410,122 @@ async function closeProject(id, name) {
   } catch(e) { alert('Afsluiten mislukt: ' + e.message); }
 }
 
+// ── REVIEW (open loops) ──────────────────────────
+async function rpc(fn, args = {}) {
+  return sb('rpc/' + fn, { method:'POST', body: args });
+}
+async function loadReviews() {
+  try {
+    const [reviews, closures] = await Promise.all([
+      rpc('get_loop_reviews'),
+      rpc('get_recent_loop_closures', { p_days: 14 })
+    ]);
+    allReviews  = reviews  || [];
+    allClosures = closures || [];
+    updateReviewBadge();
+    renderReviews();
+  } catch(e) {
+    document.getElementById('reviewList').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><div style="font-size:13px">${esc(e.message)}</div></div>`;
+    document.getElementById('closureList').innerHTML = '';
+  }
+}
+function updateReviewBadge() {
+  document.getElementById('reviewBadge').textContent = allReviews.length;
+}
+function fmtShort(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  return d.getDate() + ' ' + MONTHS[d.getMonth()];
+}
+function ctxBadge(ctx) {
+  const c = (ctx || 'algemeen').toLowerCase();
+  return `<span class="review-ctx"><span class="review-ctx-dot" style="background:${CTX_COLORS[c]||'#5a6478'}"></span>${esc(CTX_LABELS[c]||c)}</span>`;
+}
+function renderReviews() {
+  const list = allReviews.filter(r => matchCtx(r.open_item || {}));
+  document.getElementById('reviewCount').textContent = list.length + (list.length === 1 ? ' voorstel' : ' voorstellen');
+  if (!list.length) {
+    document.getElementById('reviewList').innerHTML = '<div class="empty-state"><div class="empty-icon">◎</div><div>Geen voorstellen ter review</div></div>';
+  } else {
+    document.getElementById('reviewList').innerHTML = list.map((r, i) => {
+      const oi = r.open_item || {}; const ri = r.resolving_item || {};
+      const pct = Math.round((Number(r.confidence) || 0) * 100);
+      const riMeta = [fmtShort(ri.date), ri.sender_name].filter(Boolean).join(', ');
+      return `<div class="review-card" id="rv-${r.action_id}" style="animation-delay:${Math.min(i*20,300)}ms">
+        <div class="review-top">
+          ${ctxBadge(oi.context)}
+          <span class="item-date">${fmtShort(oi.date)}</span>
+          <span class="review-conf" title="Zekerheid van het systeem">${pct}% zeker</span>
+        </div>
+        <div class="review-title">${esc(oi.title) || '(geen titel)'}</div>
+        ${oi.action ? `<div class="review-action">${esc(oi.action)}</div>` : ''}
+        <div class="review-evidence">
+          <div class="review-ev-label">Mogelijk afgesloten door</div>
+          <div class="review-ev-item">${esc(ri.title) || '(onbekend item)'}${riMeta ? ` <span>(${esc(riMeta)})</span>` : ''}</div>
+          ${r.evidence ? `<div class="review-quote">"${esc(r.evidence)}"</div>` : ''}
+          ${r.reasoning ? `<div class="review-reason">${esc(r.reasoning)}</div>` : ''}
+        </div>
+        <div class="review-buttons">
+          <button class="review-btn confirm" onclick="decideReview('${r.action_id}', true, this)">✓ Afsluiten</button>
+          <button class="review-btn keep" onclick="decideReview('${r.action_id}', false, this)">Blijft open</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  const closures = allClosures.filter(c => matchCtx(c));
+  document.getElementById('closureCount').textContent = closures.length + (closures.length === 1 ? ' item' : ' items');
+  if (!closures.length) {
+    document.getElementById('closureList').innerHTML = '<div class="empty-state" style="padding:30px"><div>Geen recent afgesloten items</div></div>';
+  } else {
+    document.getElementById('closureList').innerHTML = closures.map(c => {
+      const ri = c.resolving_item || {};
+      const how = c.confirmed_by ? 'door jou bevestigd' : 'automatisch, ' + Math.round((Number(c.confidence) || 0) * 100) + '% zeker';
+      return `<div class="closure-row" id="cl-${c.id}">
+        <div class="closure-body">
+          <div class="closure-title">${esc(c.title) || '(geen titel)'}</div>
+          <div class="closure-meta">${esc(CTX_LABELS[c.context] || c.context || '')} · afgesloten ${fmtShort(c.resolved_at)} (${how}) door: ${esc(ri.title) || '?'}</div>
+          ${c.reasoning ? `<div class="closure-meta">${esc(c.reasoning)}</div>` : ''}
+        </div>
+        <button class="action-btn" onclick="reopenClosure('${c.id}', this)">↺ Heropenen</button>
+      </div>`;
+    }).join('');
+  }
+}
+async function decideReview(actionId, confirm, btn) {
+  const card = document.getElementById('rv-' + actionId);
+  card?.querySelectorAll('.review-btn').forEach(b => b.disabled = true);
+  try {
+    await rpc('decide_loop_review', { p_action_id: actionId, p_confirm: confirm });
+    const rev = allReviews.find(r => r.action_id === actionId);
+    allReviews = allReviews.filter(r => r.action_id !== actionId);
+    updateReviewBadge();
+    if (confirm && rev && rev.open_item) {
+      const itemId = rev.open_item.id;
+      allTasks = allTasks.filter(t => t.id !== itemId); updateTasksBadge();
+      removeItem(itemId);
+    }
+    if (card) card.classList.add('is-leaving');
+    setTimeout(() => { if (confirm) loadReviews(); else renderReviews(); }, 350);
+  } catch(e) {
+    card?.querySelectorAll('.review-btn').forEach(b => b.disabled = false);
+    alert('Opslaan mislukt: ' + e.message);
+  }
+}
+async function reopenClosure(itemId, btn) {
+  if (btn) btn.disabled = true;
+  try {
+    await rpc('undo_loop_resolution', { p_item_id: itemId });
+    allClosures = allClosures.filter(c => c.id !== itemId);
+    renderReviews();
+    loadItems(); loadTasks();
+  } catch(e) {
+    if (btn) btn.disabled = false;
+    alert('Heropenen mislukt: ' + e.message);
+  }
+}
+
 // ── ASK ───────────────────────────────────────────
 function fillQ(el) { document.getElementById('askInput').value = el.textContent; }
 async function sendAsk() {
@@ -1431,14 +1602,14 @@ function switchTab(name, el) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
   if (el) el.classList.add('active');
-  const titles = { items:'Priority Feed', tasks:'Tasks', agenda:'Agenda', contacts:'Contacts', projects:'Projects', ask:'Ask' };
+  const titles = { items:'Priority Feed', tasks:'Tasks', agenda:'Agenda', contacts:'Contacts', projects:'Projects', review:'Review', ask:'Ask' };
   document.getElementById('pageTitle').innerHTML = titles[name] + ' <span class="topbar-sub" id="pageSub"></span>';
-  const subs = { items: allItems.length+' total', tasks: allTasks.length+' taken', agenda: allEvents.filter(e=>!e.is_cancelled).length+' afspraken', contacts: allContacts.length+' contacten', projects: allProjects.length+' actief', ask:'' };
+  const subs = { items: allItems.length+' total', tasks: allTasks.length+' taken', agenda: allEvents.filter(e=>!e.is_cancelled).length+' afspraken', contacts: allContacts.length+' contacten', projects: allProjects.length+' actief', review: allReviews.length+' voorstellen', ask:'' };
   document.getElementById('pageSub').textContent = subs[name] || '';
   const searchInput = document.getElementById('searchInput');
-  const searchLabels = { items:'Search items...', tasks:'Search tasks...', agenda:'', contacts:'Search contacts...', projects:'Search projects...', ask:'' };
+  const searchLabels = { items:'Search items...', tasks:'Search tasks...', agenda:'', contacts:'Search contacts...', projects:'Search projects...', review:'', ask:'' };
   searchInput.placeholder = searchLabels[name] || '';
-  searchInput.style.display = (name === 'ask' || name === 'agenda') ? 'none' : '';
+  searchInput.style.display = (name === 'ask' || name === 'agenda' || name === 'review') ? 'none' : '';
   if (name === 'ask') {
     setTimeout(() => {
       document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
