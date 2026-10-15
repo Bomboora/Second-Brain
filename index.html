@@ -148,6 +148,31 @@ body::before { content:''; position:fixed; inset:0; background:radial-gradient(e
 .action-btn.done:hover { border-color:rgba(61,214,140,0.3); color:var(--accent-green); }
 .action-btn.del:hover { border-color:rgba(255,77,77,0.3); color:var(--accent-red); }
 
+/* TIJDLIJN (15/10/2026) */
+.stat-card.s-closed { --accent-color:var(--accent-green); }
+.s-closed .stat-icon { color:var(--accent-green); }
+.day-head { display:flex; align-items:baseline; gap:10px; margin:22px 0 8px; font-family:'Syne',sans-serif; font-size:14px; font-weight:700; color:var(--text); }
+.day-head:first-child { margin-top:4px; }
+.day-head .day-n { font-family:'DM Sans',sans-serif; font-size:12px; font-weight:500; color:var(--muted); }
+.tl-card { display:flex; gap:12px; align-items:flex-start; background:var(--card); border:1px solid var(--border); border-left:3px solid var(--ctx,#5a6478); border-radius:10px; padding:10px 14px; cursor:pointer; transition:background 0.15s,border-color 0.15s; }
+.tl-card:hover { background:var(--card-hover); border-color:var(--border-active); border-left-color:var(--ctx,#5a6478); }
+.tl-card.is-closed { opacity:0.5; }
+.tl-icon { width:22px; flex:0 0 22px; text-align:center; font-size:14px; color:var(--muted); padding-top:1px; }
+.tl-main { flex:1; min-width:0; }
+.tl-top { display:flex; gap:8px; align-items:baseline; font-size:12px; color:var(--muted); }
+.tl-from { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:60%; }
+.tl-time { margin-left:auto; white-space:nowrap; }
+.tl-title { font-size:14px; font-weight:600; color:var(--text); margin-top:2px; line-height:1.35; }
+.tl-card.is-closed .tl-title { text-decoration:line-through; text-decoration-color:var(--subtle); }
+.tl-sum { font-size:12.5px; color:var(--muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.tl-side { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex:0 0 auto; }
+.tl-side .badge { white-space:nowrap; }
+.b-closed { background:rgba(61,214,140,0.1); color:var(--accent-green); border:1px solid rgba(61,214,140,0.2); }
+.tl-btns { display:flex; gap:6px; opacity:0; transition:opacity 0.15s; }
+.tl-card:hover .tl-btns { opacity:1; }
+@media (hover:none) { .tl-btns { opacity:1; } }
+@media (max-width:700px) { .tl-from { max-width:45%; } .tl-sum { white-space:normal; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; } }
+
 /* TABS */
 .tab-content { display:none; }
 .tab-content.active { display:block; }
@@ -402,7 +427,7 @@ const CONFIG = {
   <!-- MAIN -->
   <main class="main">
     <div class="topbar">
-      <div class="topbar-title" id="pageTitle">Priority Feed <span class="topbar-sub" id="pageSub"></span></div>
+      <div class="topbar-title" id="pageTitle">Tijdlijn <span class="topbar-sub" id="pageSub"></span></div>
       <div class="search-bar"><span>🔍</span><input type="text" id="searchInput" placeholder="Search items..." oninput="onSearch()"></div>
       <button class="btn-icon" onclick="loadAll()" title="Refresh">↻</button>
     </div>
@@ -422,44 +447,47 @@ const CONFIG = {
 
       <!-- ITEMS TAB -->
       <div class="tab-content active" id="tab-items">
-        <div class="insight-label">Status Overview</div>
-        <div class="insight-title">Curator Insight</div>
+        <div class="insight-label">Tijdlijn</div>
+        <div class="insight-title">Wat kwam er binnen</div>
         <div class="stats-grid">
-          <div class="stat-card s-urgent" id="sc-urgent" onclick="setStatFilter('urgent')">
-            <div class="stat-label">Urgent</div>
-            <div class="stat-row"><div class="stat-number" id="sUrgent">—</div><div class="stat-icon">!</div></div>
+          <div class="stat-card s-recent" id="sc-today" onclick="setStatFilter('today')">
+            <div class="stat-label">Nieuw vandaag</div>
+            <div class="stat-row"><div class="stat-number" id="sToday">—</div><div class="stat-icon">◷</div></div>
           </div>
-          <div class="stat-card s-high" id="sc-high" onclick="setStatFilter('high')">
-            <div class="stat-label">High Priority</div>
-            <div class="stat-row"><div class="stat-number" id="sHigh">—</div><div class="stat-icon">⚡</div></div>
+          <div class="stat-card s-actions" id="sc-tasks" onclick="setStatFilter('tasks')">
+            <div class="stat-label">Open taken</div>
+            <div class="stat-row"><div class="stat-number" id="sTasks">—</div><div class="stat-icon">☑</div></div>
           </div>
-          <div class="stat-card s-actions" id="sc-actions" onclick="setStatFilter('actions')">
-            <div class="stat-label">Actions</div>
-            <div class="stat-row"><div class="stat-number" id="sActions">—</div><div class="stat-icon">↗</div></div>
+          <div class="stat-card s-urgent" id="sc-overdue" onclick="setStatFilter('overdue')">
+            <div class="stat-label">Vervallen deadlines</div>
+            <div class="stat-row"><div class="stat-number" id="sOverdue">—</div><div class="stat-icon">!</div></div>
           </div>
-          <div class="stat-card s-recent" id="sc-recent" onclick="setStatFilter('recent')">
-            <div class="stat-label">Recent (24h)</div>
-            <div class="stat-row"><div class="stat-number" id="sRecent">—</div><div class="stat-icon">◷</div></div>
+          <div class="stat-card s-closed" id="sc-closed" onclick="setStatFilter('closed')">
+            <div class="stat-label">Automatisch afgesloten (24u)</div>
+            <div class="stat-row"><div class="stat-number" id="sClosed">—</div><div class="stat-icon">✓</div></div>
           </div>
         </div>
         <div class="section-header">
-          <div class="section-title">Priority Feed</div>
+          <div class="section-title">Tijdlijn</div>
           <span class="section-count" id="itemCount"></span>
         </div>
         <div class="filter-bar">
-          <button class="filter-chip active" id="fAll"    onclick="setPriFilter('all',this)">All</button>
-          <button class="filter-chip"        id="fUrgent" onclick="setPriFilter('urgent',this)">🔴 Urgent</button>
-          <button class="filter-chip"        id="fHigh"   onclick="setPriFilter('high',this)">🟠 High</button>
-          <button class="filter-chip"        id="fMedium" onclick="setPriFilter('medium',this)">🔵 Medium</button>
+          <button class="filter-chip"        id="fDays7"   onclick="setDays(7)">7 dagen</button>
+          <button class="filter-chip active" id="fDays14"  onclick="setDays(14)">14 dagen</button>
+          <button class="filter-chip"        id="fDays30"  onclick="setDays(30)">30 dagen</button>
+          <button class="filter-chip"        id="fDays0"   onclick="setDays(0)">Alles</button>
           <div class="filter-sep"></div>
-          <button class="filter-chip" id="fEmail"    onclick="setSrcFilter('email',this)">Email</button>
-          <button class="filter-chip" id="fTelegram" onclick="setSrcFilter('telegram',this)">Telegram</button>
+          <button class="filter-chip" id="fK-inkomend"  onclick="setKind('inkomend')">✉ Inkomend</button>
+          <button class="filter-chip" id="fK-verzonden" onclick="setKind('verzonden')">↗ Verzonden</button>
+          <button class="filter-chip" id="fK-telegram"  onclick="setKind('telegram')">✈ Telegram</button>
+          <button class="filter-chip" id="fK-document"  onclick="setKind('document')">📄 Document</button>
           <div class="filter-sep"></div>
-          <button class="filter-chip" id="fAction" onclick="setActFilter(this)">Action required</button>
-          <button class="filter-chip" id="fRecent" onclick="setPriFilter('all',document.getElementById('fAll'));setRecentFilter()" style="display:none">◷ Recent (24h) ✕</button>
+          <button class="filter-chip" id="fOnlyTasks" onclick="toggleOnlyTasks()">☑ Alleen taken</button>
+          <button class="filter-chip" id="fHideDone"  onclick="toggleHideDone()">Verberg afgerond</button>
+          <button class="filter-chip active-purple" id="fStat" onclick="clearStatFilter()" style="display:none"></button>
         </div>
         <div class="items-list" id="itemsList">
-          <div class="loading-state"><div class="spinner"></div>Loading items...</div>
+          <div class="loading-state"><div class="spinner"></div>Tijdlijn laden...</div>
         </div>
       </div>
 
@@ -566,7 +594,7 @@ let agendaShowCancelled = false;
 let G_CTX = null;
 
 // FIX: F object now includes 'recent' flag
-let F = { priority: null, source: null, action: false, search: '', recent: false };
+let F = { days: 14, kind: null, onlyTasks: false, hideDone: false, stat: null, search: '' };
 
 const COLORS = ['#f5a623','#4b9eff','#a78bfa','#3dd68c','#ff6b6b','#f093fb'];
 const CTX_ORDER  = ['superellipse','zennzibar','quantum_design','prive','algemeen'];
@@ -699,195 +727,205 @@ async function loadAll() {
   initChatSession();
 }
 
-// ── ITEMS ───────────────────────────────────────
+// ── ITEMS: TIJDLIJN (15/10/2026) ─────────────────
+// Toont alles wat binnenkwam in een tijdvenster, per dag, nieuwste eerst.
+// Afgeronde items blijven zichtbaar (grijs), tenzij "Verberg afgerond" aan staat.
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/`/g,"'").replace(/\$/g,'&#36;'); }
+const MONTHS_NL = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+const DAYS_NL = ['zo','ma','di','wo','do','vr','za'];
+
+function itemTime(i) { const d = new Date(i.received_at || i.created_at); return isNaN(d.getTime()) ? null : d; }
+function isClosed(i) { const st = (i.status||'').toLowerCase(); return st === 'done' || i.completed === true; }
+function isSnoozed(i) { return (i.status||'').toLowerCase() === 'snoozed'; }
+function isTask(item) {
+  return item.action_required === true || item.action_required === 'true' || item.category === 'Task';
+}
+function srcKind(i) {
+  const s = (i.source||'').toLowerCase();
+  if (s.includes('sent')) return 'verzonden';
+  if (s.includes('telegram') || s.includes('voice')) return 'telegram';
+  if (s.includes('doc') || s.includes('nas') || s.includes('synology')) return 'document';
+  if (s.includes('dashboard')) return 'dashboard';
+  return 'inkomend';
+}
+const KIND_ICON = { inkomend:'✉', verzonden:'↗', telegram:'✈', document:'📄', dashboard:'☑' };
+function startOfToday() { const d = new Date(); d.setHours(0,0,0,0); return d; }
+
 async function loadItems() {
-  document.getElementById('itemsList').innerHTML = '<div class="loading-state"><div class="spinner"></div>Loading items...</div>';
+  document.getElementById('itemsList').innerHTML = '<div class="loading-state"><div class="spinner"></div>Tijdlijn laden...</div>';
   try {
-    const data = await sb(
-      'items?deleted=is.false' +
-      '&or=(status.is.null,status.not.in.(done,snoozed))' +
-      '&select=id,title,summary,priority,status,source,category,relevance_score,action_required,action_description,due_date,sender_name,created_at,received_at,context' +
-      '&order=relevance_score.desc.nullslast,created_at.desc&limit=300'
-    );
-    allItems = data || [];
+    let q = 'items?deleted=is.false' +
+      '&select=id,title,summary,priority,status,completed,source,category,action_required,action_description,due_date,sender_name,created_at,received_at,context,' +
+      'resolved_at:metadata->resolution->>resolved_at,cleanup:metadata->bulk_cleanup->>action' +
+      '&order=created_at.desc&limit=' + (F.days ? 1000 : 2000);
+    if (F.days) {
+      const since = new Date(Date.now() - F.days*86400000).toISOString();
+      q += `&or=(received_at.gte.${since},and(received_at.is.null,created_at.gte.${since}))`;
+    }
+    const data = await sb(q);
+    allItems = (data || []).sort((a,b) => (itemTime(b)||0) - (itemTime(a)||0));
     updateStats();
     renderItems();
   } catch(e) {
-    document.getElementById('itemsList').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><div style="font-size:13px">${e.message}</div></div>`;
+    document.getElementById('itemsList').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><div style="font-size:13px">${esc(e.message)}</div></div>`;
   }
 }
 
-// FIX: updateStats now respects context filter correctly and counts recent properly
 function updateStats() {
-  const now = Date.now();
-  const src = G_CTX ? allItems.filter(matchCtx) : allItems;
-
-  const urgentCount  = src.filter(i => (i.priority||'').toLowerCase() === 'urgent').length;
-  const highCount    = src.filter(i => (i.priority||'').toLowerCase() === 'high').length;
-  const actionsCount = src.filter(i => i.action_required === true || i.action_required === 'true').length;
-  const recentCount  = src.filter(i => {
-    const raw = i.received_at || i.created_at;
-    if (!raw) return false;
-    const dt = new Date(raw);
-    return !isNaN(dt.getTime()) && (now - dt.getTime()) < 86400000;
-  }).length;
-
-  document.getElementById('sUrgent').textContent  = urgentCount;
-  document.getElementById('sHigh').textContent    = highCount;
-  document.getElementById('sActions').textContent = actionsCount;
-  document.getElementById('sRecent').textContent  = recentCount;
-
-  // Nav badge: urgent count if any, else total
-  const urgent = src.filter(i => (i.priority||'').toLowerCase() === 'urgent').length;
-  document.getElementById('urgentBadge').textContent = urgent > 0 ? urgent : (src.length > 0 ? src.length : '—');
+  const today0 = startOfToday().getTime();
+  const todayIso = todayStr();
+  const its = allItems.filter(matchCtx);
+  const tasks = (allTasks || []).filter(matchCtx);
+  const newToday = its.filter(i => { const t = itemTime(i); return t && t.getTime() >= today0 && srcKind(i) !== 'verzonden'; }).length;
+  const overdue = tasks.filter(t => t.due_date && t.due_date < todayIso).length;
+  const closed24 = its.filter(i => i.resolved_at && (Date.now() - new Date(i.resolved_at).getTime()) < 86400000).length;
+  document.getElementById('sToday').textContent   = newToday;
+  document.getElementById('sTasks').textContent   = tasks.length;
+  document.getElementById('sOverdue').textContent = overdue;
+  document.getElementById('sClosed').textContent  = closed24;
+  document.getElementById('urgentBadge').textContent = newToday > 0 ? newToday : '—';
 }
 
-// FIX: filtered() now includes recent filter + uses consistent logic with updateStats
 function filtered() {
-  const now = Date.now();
+  const today0 = startOfToday().getTime();
+  const todayIso = todayStr();
+  const q = (F.search||'').toLowerCase();
   return allItems.filter(i => {
     if (!matchCtx(i)) return false;
-    if (F.priority && F.priority !== 'all' && (i.priority||'').toLowerCase() !== F.priority) return false;
-    if (F.source && (i.source||'').toLowerCase() !== F.source) return false;
-    if (F.action && i.action_required !== true && i.action_required !== 'true') return false;
-    if (F.recent) {
-      const raw = i.received_at || i.created_at;
-      if (!raw) return false;
-      const dt = new Date(raw);
-      if (isNaN(dt.getTime()) || (now - dt.getTime()) >= 86400000) return false;
-    }
-    if (F.search) {
-      const q = F.search.toLowerCase();
-      if (!(i.title||'').toLowerCase().includes(q) && !(i.summary||'').toLowerCase().includes(q)) return false;
-    }
+    if (F.kind && srcKind(i) !== F.kind) return false;
+    if (F.onlyTasks && !(isTask(i) && !isClosed(i) && !isSnoozed(i))) return false;
+    if (F.hideDone && (isClosed(i) || isSnoozed(i))) return false;
+    if (F.stat === 'today') { const t = itemTime(i); if (!t || t.getTime() < today0 || srcKind(i) === 'verzonden') return false; }
+    if (F.stat === 'overdue' && !(isTask(i) && !isClosed(i) && i.due_date && i.due_date < todayIso)) return false;
+    if (F.stat === 'closed' && !(i.resolved_at && (Date.now() - new Date(i.resolved_at).getTime()) < 86400000)) return false;
+    if (q && !(i.title||'').toLowerCase().includes(q) && !(i.summary||'').toLowerCase().includes(q) && !(i.sender_name||'').toLowerCase().includes(q)) return false;
     return true;
   });
 }
 
-function barColor(score) {
-  if (score >= 8) return '#f5a623';
-  if (score >= 5) return '#4b9eff';
-  return '#3a4255';
+function dayLabel(d) {
+  const t0 = startOfToday();
+  const diff = Math.round((t0 - new Date(d.getFullYear(), d.getMonth(), d.getDate())) / 86400000);
+  if (diff === 0) return 'Vandaag';
+  if (diff === 1) return 'Gisteren';
+  return `${DAYS_NL[d.getDay()]} ${d.getDate()} ${MONTHS_NL[d.getMonth()]}`;
 }
-function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/`/g,"'").replace(/\$/g,'&#36;'); }
+function closedLabel(i) {
+  if (isSnoozed(i)) return '<span class="badge b-snoozed">⏸ gesnoozed</span>';
+  if (!isClosed(i)) return '';
+  const how = i.resolved_at ? ' · automatisch' : (i.cleanup ? ' · opkuis' : '');
+  return `<span class="badge b-closed">✓ afgerond${how}</span>`;
+}
 
 function renderItems() {
   const items = filtered();
-  document.getElementById('itemCount').textContent = `${items.length} actieve items`;
-  document.getElementById('pageSub').textContent = allItems.length + ' total';
+  document.getElementById('itemCount').textContent = `${items.length} items` + (F.days ? ` · laatste ${F.days} dagen` : ' · alles');
+  const sub = document.getElementById('pageSub'); if (sub && document.getElementById('tab-items').classList.contains('active')) sub.textContent = allItems.length + ' in venster';
+  window._renderedItems = items;
   if (!items.length) {
-    document.getElementById('itemsList').innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><div>Geen items gevonden</div></div>';
+    document.getElementById('itemsList').innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><div>Geen items in deze selectie</div></div>';
     return;
   }
-  document.getElementById('itemsList').innerHTML = items.map((item,i) => {
-    const score = item.relevance_score || 0;
-    const bc = barColor(score);
-    const date = new Date(item.received_at || item.created_at).toLocaleDateString('nl-BE',{day:'numeric',month:'short'});
-    const prio = (item.priority || 'low').toLowerCase();
-    const status = (item.status || 'new').toLowerCase();
-    const hasAction = item.action_required === true || item.action_required === 'true';
-    const t = esc(item.title); const s = esc(item.summary);
-    const ctxDot = item.context ? `<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${CTX_COLORS[item.context]||'#5a6478'};margin-right:4px;vertical-align:middle"></span>` : '';
-    return `<div class="item-card" style="animation-delay:${Math.min(i*20,300)}ms" onclick="openItemModal(${i})">
-      <div class="item-card-top">
-        <span class="badge b-${status}">${status}</span>
-        <span class="badge b-${prio}">${prio}</span>
-        ${hasAction ? '<span class="badge b-action">action</span>' : ''}
-        <div class="item-meta">
-          <span class="item-date">${ctxDot}${date}</span>
-          <div class="item-actions" onclick="event.stopPropagation()">
-            <button class="action-btn done" onclick="markDone('${item.id}')">✓ Done</button>
-            <button class="action-btn" onclick="snooze('${item.id}')">⏸ Snooze</button>
-            <button class="action-btn del" onclick="delItem('${item.id}')">✕</button>
-          </div>
+  // groeperen per dag
+  const groups = [];
+  items.forEach((item, idx) => {
+    const d = itemTime(item) || new Date(0);
+    const key = d.toDateString();
+    let g = groups[groups.length-1];
+    if (!g || g.key !== key) { g = { key, label: dayLabel(d), rows: [] }; groups.push(g); }
+    g.rows.push({ item, idx });
+  });
+  let html = '';
+  groups.forEach(g => {
+    html += `<div class="day-head">${g.label}<span class="day-n">${g.rows.length}</span></div>`;
+    g.rows.forEach(({ item, idx }) => {
+      const closed = isClosed(item) || isSnoozed(item);
+      const task = isTask(item);
+      const kind = srcKind(item);
+      const d = itemTime(item);
+      const time = d ? d.toLocaleTimeString('nl-BE', { hour:'2-digit', minute:'2-digit' }) : '';
+      const from = kind === 'verzonden' ? 'Verzonden' : (item.sender_name || (kind === 'telegram' ? 'Telegram' : kind === 'document' ? 'Document' : ''));
+      const ctxColor = CTX_COLORS[(item.context||'algemeen').toLowerCase()] || '#5a6478';
+      const status = closed ? closedLabel(item) : (task ? '<span class="badge b-action" title="Staat in de takenlijst">☑ taak</span>' : '');
+      const due = (!closed && task && item.due_date) ? `<span class="badge ${item.due_date < todayStr() ? 'b-urgent' : 'b-normal'}">⏱ ${fmtDate(item.due_date)}</span>` : '';
+      const btns = closed ? '' : `<div class="tl-btns" onclick="event.stopPropagation()">
+          ${task ? '' : `<button class="action-btn" onclick="toTask('${item.id}')" title="Zet dit item in de takenlijst">→ Taak</button>`}
+          <button class="action-btn del" onclick="delItem('${item.id}')" title="Verwijderen (ruis)">✕</button>
+        </div>`;
+      html += `<div class="tl-card${closed ? ' is-closed' : ''}" style="--ctx:${ctxColor}" onclick="openItemModal(${idx})">
+        <div class="tl-icon" title="${kind}">${KIND_ICON[kind] || '✉'}</div>
+        <div class="tl-main">
+          <div class="tl-top"><span class="tl-from">${esc(from)}</span><span class="tl-time">${time}</span></div>
+          <div class="tl-title">${esc(item.title) || '(geen titel)'}</div>
+          ${item.summary ? `<div class="tl-sum">${esc(item.summary)}</div>` : ''}
         </div>
-      </div>
-      <div class="item-title">${t || '(geen titel)'}</div>
-      ${s ? `<div class="item-summary">${s}</div>` : ''}
-      <div class="item-footer">
-        <div class="relevance-block">
-          <span class="relevance-label">Relevance</span>
-          <div class="relevance-bar"><div class="relevance-fill" style="width:${score*10}%;background:${bc}"></div></div>
-          <span class="relevance-score" style="color:${bc}">${score} / 10</span>
-        </div>
-        <span class="item-source">Source: ${(item.source||'—').toUpperCase()}</span>
-      </div>
-    </div>`;
-  }).join('');
-  window._renderedItems = items;
+        <div class="tl-side">${status}${due}${btns}</div>
+      </div>`;
+    });
+  });
+  document.getElementById('itemsList').innerHTML = html;
 }
 
-// ── STAT CARD FILTER — FIX: unified handler that resets all other filters ──
-function setStatFilter(type) {
-  // Reset everything first so stat count always matches feed count
-  F = { priority: null, source: null, action: false, search: '', recent: false };
-  document.getElementById('searchInput').value = '';
-  resetFilterChipsUI();
-
-  if (type === 'urgent') {
-    F.priority = 'urgent';
-    document.getElementById('fUrgent')?.classList.add('active');
-    document.getElementById('fAll')?.classList.remove('active');
-  } else if (type === 'high') {
-    F.priority = 'high';
-    document.getElementById('fHigh')?.classList.add('active');
-    document.getElementById('fAll')?.classList.remove('active');
-  } else if (type === 'actions') {
-    F.action = true;
-    document.getElementById('fAction')?.classList.add('active');
-  } else if (type === 'recent') {
-    F.recent = true;
-    document.getElementById('fRecent').style.display = '';
-    document.getElementById('fRecent')?.classList.add('active-purple');
-  }
-
-  // Highlight active stat card
-  ['sc-urgent','sc-high','sc-actions','sc-recent'].forEach(id => document.getElementById(id)?.classList.remove('stat-active'));
-  document.getElementById('sc-'+type)?.classList.add('stat-active');
-
+// ── TIJDLIJN FILTERS ─────────────────────────────
+function setDays(n) {
+  F.days = n;
+  [7,14,30,0].forEach(x => document.getElementById('fDays'+x)?.classList.toggle('active', x === n));
+  loadItems();
+}
+function setKind(k) {
+  F.kind = (F.kind === k) ? null : k;
+  ['inkomend','verzonden','telegram','document'].forEach(x => document.getElementById('fK-'+x)?.classList.toggle('active', x === F.kind));
   renderItems();
 }
-
-function resetFilterChipsUI() {
-  ['fAll','fUrgent','fHigh','fMedium'].forEach(id => document.getElementById(id)?.classList.remove('active'));
-  document.getElementById('fAll')?.classList.add('active');
-  document.getElementById('fAction')?.classList.remove('active');
-  ['fEmail','fTelegram'].forEach(id => document.getElementById(id)?.classList.remove('active'));
-  document.getElementById('fRecent').style.display = 'none';
-  document.getElementById('fRecent')?.classList.remove('active-purple');
-  ['sc-urgent','sc-high','sc-actions','sc-recent'].forEach(id => document.getElementById(id)?.classList.remove('stat-active'));
+function toggleOnlyTasks() {
+  F.onlyTasks = !F.onlyTasks;
+  document.getElementById('fOnlyTasks')?.classList.toggle('active', F.onlyTasks);
+  renderItems();
 }
-
-// FIX: setRecentFilter — toggle off if already active
-function setRecentFilter() {
-  if (F.recent) {
-    F.recent = false;
-    document.getElementById('fRecent').style.display = 'none';
-    document.getElementById('fRecent')?.classList.remove('active-purple');
-    document.getElementById('sc-recent')?.classList.remove('stat-active');
-    renderItems();
-  } else {
-    setStatFilter('recent');
-  }
+function toggleHideDone() {
+  F.hideDone = !F.hideDone;
+  document.getElementById('fHideDone')?.classList.toggle('active', F.hideDone);
+  try { localStorage.setItem('sb_hide_done', F.hideDone ? '1' : '0'); } catch(e) {}
+  renderItems();
 }
+const STAT_LABELS = { today:'Nieuw vandaag', tasks:'Open taken', overdue:'Vervallen deadlines', closed:'Automatisch afgesloten (24u)' };
+function setStatFilter(type) {
+  if (type === 'tasks') { switchTab('tasks', document.querySelector(`.nav-item[onclick*="'tasks'"]`)); return; }
+  if (F.stat === type) { clearStatFilter(); return; }
+  F.stat = type;
+  ['today','tasks','overdue','closed'].forEach(x => document.getElementById('sc-'+x)?.classList.toggle('stat-active', x === type));
+  const chip = document.getElementById('fStat'); chip.style.display = ''; chip.textContent = STAT_LABELS[type] + ' ✕';
+  renderItems();
+}
+function clearStatFilter() {
+  F.stat = null;
+  ['today','tasks','overdue','closed'].forEach(x => document.getElementById('sc-'+x)?.classList.remove('stat-active'));
+  document.getElementById('fStat').style.display = 'none';
+  renderItems();
+}
+(function initHideDone(){ try { F.hideDone = localStorage.getItem('sb_hide_done') === '1'; } catch(e) {} document.getElementById('fHideDone')?.classList.toggle('active', F.hideDone); })();
 
 // ── ITEM MODAL ────────────────────────────────────
 function openItemModal(idx) {
   const item = window._renderedItems[idx];
+  const closed = isClosed(item) || isSnoozed(item);
+  const task = isTask(item);
+  const d = itemTime(item);
   document.getElementById('modalTitle').textContent = item.title || '(geen titel)';
   document.getElementById('modalBody').innerHTML = `
-    ${item.category ? `<div class="modal-field"><div class="modal-field-label">Categorie</div><div class="modal-field-value">${item.category}</div></div>` : ''}
-    ${item.summary ? `<div class="modal-field"><div class="modal-field-label">Samenvatting</div><div class="modal-field-value">${item.summary}</div></div>` : ''}
-    ${item.action_description ? `<div class="modal-field"><div class="modal-field-label">Actie vereist</div><div class="modal-field-value">${item.action_description}</div></div>` : ''}
-    ${item.due_date ? `<div class="modal-field"><div class="modal-field-label">Deadline</div><div class="modal-field-value">${item.due_date}</div></div>` : ''}
-    ${item.sender_name ? `<div class="modal-field"><div class="modal-field-label">Van</div><div class="modal-field-value">${item.sender_name}</div></div>` : ''}
-    <div class="modal-field"><div class="modal-field-label">Bron / Status / Prioriteit</div><div class="modal-field-value">${item.source||'—'} · ${item.status||'new'} · ${item.priority||'—'}</div></div>
-    <div class="modal-field"><div class="modal-field-label">Context</div><div class="modal-field-value">${CTX_LABELS[item.context]||item.context||'—'}</div></div>
-    <div class="modal-field"><div class="modal-field-label">Relevantie</div><div class="modal-field-value">${item.relevance_score||0}/10</div></div>
+    ${item.summary ? `<div class="modal-field"><div class="modal-field-label">Samenvatting</div><div class="modal-field-value">${esc(item.summary)}</div></div>` : ''}
+    ${item.action_description ? `<div class="modal-field"><div class="modal-field-label">Actie</div><div class="modal-field-value">${esc(item.action_description)}</div></div>` : ''}
+    ${item.due_date ? `<div class="modal-field"><div class="modal-field-label">Deadline</div><div class="modal-field-value">${fmtDate(item.due_date)}</div></div>` : ''}
+    ${item.sender_name ? `<div class="modal-field"><div class="modal-field-label">Van</div><div class="modal-field-value">${esc(item.sender_name)}</div></div>` : ''}
+    <div class="modal-field"><div class="modal-field-label">Datum</div><div class="modal-field-value">${d ? d.toLocaleString('nl-BE',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—'}</div></div>
+    <div class="modal-field"><div class="modal-field-label">Takenlijst</div><div class="modal-field-value">${closed ? (isSnoozed(item) ? '⏸ Gesnoozed' : '✓ Afgerond' + (item.resolved_at ? ' (automatisch afgesloten)' : item.cleanup ? ' (opkuis)' : '')) : (task ? '☑ Staat in de takenlijst' : 'Staat niet in de takenlijst')}</div></div>
+    <div class="modal-field"><div class="modal-field-label">Context / Bron / Categorie</div><div class="modal-field-value">${CTX_LABELS[item.context]||item.context||'—'} · ${esc(item.source||'—')} · ${esc(item.category||'—')}</div></div>
   `;
-  document.getElementById('modalActions').innerHTML = `
-    <button class="btn-primary" onclick="markDone('${item.id}');closeModal()">✓ Done</button>
-    <button class="btn-secondary" onclick="snooze('${item.id}');closeModal()">⏸ Snooze</button>
+  document.getElementById('modalActions').innerHTML = closed ? `
+    <button class="btn-secondary" onclick="closeModal()">Sluiten</button>
+  ` : `
+    ${task ? `<button class="btn-primary" onclick="markDone('${item.id}');closeModal()">✓ Afgerond</button>`
+           : `<button class="btn-primary" onclick="toTask('${item.id}');closeModal()">→ Taak</button>`}
     <button class="btn-danger" onclick="delItem('${item.id}');closeModal()">Verwijderen</button>
   `;
   document.getElementById('modalOverlay').classList.add('open');
@@ -895,26 +933,47 @@ function openItemModal(idx) {
 function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
 
 // ── ITEM ACTIONS ─────────────────────────────────
+function patchItemLocal(id, patch) {
+  allItems = allItems.map(i => i.id === id ? { ...i, ...patch } : i);
+  updateStats(); renderItems();
+}
+async function toTask(id) {
+  try {
+    await sb(`items?id=eq.${id}`,{method:'PATCH',body:{action_required:true},prefer:'return=minimal'});
+    patchItemLocal(id, { action_required:true });
+    if (typeof loadTasks === 'function') loadTasks();
+  } catch(e){alert(e.message);}
+}
 async function markDone(id) {
-  try { await sb(`items?id=eq.${id}`,{method:'PATCH',body:{status:'done',completed:true,action_required:false},prefer:'return=minimal'}); removeItem(id); } catch(e){alert(e.message);}
+  try {
+    await sb(`items?id=eq.${id}`,{method:'PATCH',body:{status:'done',completed:true,action_required:false},prefer:'return=minimal'});
+    removeItem(id);
+    allTasks = (allTasks||[]).filter(t => t.id !== id); updateTasksBadge();
+  } catch(e){alert(e.message);}
 }
 async function snooze(id) {
-  try { await sb(`items?id=eq.${id}`,{method:'PATCH',body:{status:'snoozed'},prefer:'return=minimal'}); removeItem(id); } catch(e){alert(e.message);}
+  try { await sb(`items?id=eq.${id}`,{method:'PATCH',body:{status:'snoozed'},prefer:'return=minimal'}); patchItemLocal(id, { status:'snoozed' }); } catch(e){alert(e.message);}
 }
 async function delItem(id) {
   if(!confirm('Item verwijderen?')) return;
-  try { await sb(`items?id=eq.${id}`,{method:'PATCH',body:{deleted:true},prefer:'return=minimal'}); removeItem(id); } catch(e){alert(e.message);}
+  try {
+    await sb(`items?id=eq.${id}`,{method:'PATCH',body:{deleted:true},prefer:'return=minimal'});
+    allItems = allItems.filter(i => i.id !== id); updateStats(); renderItems();
+    allTasks = (allTasks||[]).filter(t => t.id !== id); if (typeof updateTasksBadge === 'function') updateTasksBadge();
+  } catch(e){alert(e.message);}
 }
-function removeItem(id) { allItems = allItems.filter(i => i.id !== id); updateStats(); renderItems(); }
+// Een taak is afgerond (in Taken, Review of hier): item blijft in de tijdlijn, maar als afgerond.
+function removeItem(id) { patchItemLocal(id, { status:'done', completed:true, action_required:false }); }
 
 // ── TASKS ────────────────────────────────────────
+// 15/10/2026: Taken = alle open acties (category Task OF action_required), zelfde definitie als het ochtendoverzicht
 async function loadTasks() {
   document.getElementById('tasksList').innerHTML = '<div class="loading-state"><div class="spinner"></div>Taken laden...</div>';
   try {
     const data = await sb(
-      'items?deleted=is.false&category=eq.Task' +
-      '&or=(status.is.null,status.not.in.(done,snoozed))' +
-      '&select=id,title,action_description,priority,due_date,context,project_name,status,created_at' +
+      'items?deleted=is.false' +
+      '&and=(or(category.eq.Task,action_required.is.true),or(status.is.null,status.not.in.(done,snoozed)))' +
+      '&select=id,title,action_description,summary,priority,due_date,context,project_name,status,created_at' +
       '&order=due_date.asc.nullslast,created_at.desc&limit=200'
     );
     allTasks = data || [];
@@ -923,9 +982,9 @@ async function loadTasks() {
   } catch(e) {
     try {
       const data = await sb(
-        'items?deleted=is.false&category=eq.Task' +
-        '&or=(status.is.null,status.not.in.(done,snoozed))' +
-        '&select=id,title,action_description,priority,due_date,context,status,created_at' +
+        'items?deleted=is.false' +
+        '&and=(or(category.eq.Task,action_required.is.true),or(status.is.null,status.not.in.(done,snoozed)))' +
+        '&select=id,title,action_description,summary,priority,due_date,context,status,created_at' +
         '&order=due_date.asc.nullslast,created_at.desc&limit=200'
       );
       allTasks = (data || []).map(t => ({...t, project_name: null}));
@@ -939,6 +998,7 @@ async function loadTasks() {
 function updateTasksBadge() {
   const n = allTasks.length;
   document.getElementById('tasksBadge').textContent = n > 0 ? n : '—';
+  if (typeof updateStats === 'function' && document.getElementById('sTasks')) updateStats();
 }
 function todayStr() { return new Date().toISOString().split('T')[0]; }
 function endOfWeekStr() {
@@ -1003,7 +1063,7 @@ function renderTasks() {
           <div class="task-chk" onclick="markTaskDone('${t.id}')"></div>
           <div style="flex:1;min-width:0">
             <div class="task-title-text">${esc(t.title)||'(geen titel)'}</div>
-            ${t.action_description ? `<div class="task-desc">${esc(t.action_description)}</div>` : ''}
+            ${(t.action_description || t.summary) ? `<div class="task-desc">${esc(t.action_description || t.summary)}</div>` : ''}
           </div>
           <div class="task-date-wrap">
             <span class="task-date-label ${dateCls}" onclick="openTaskDate('${t.id}')">${dateLabel}</span>
@@ -1563,36 +1623,7 @@ async function sendAsk() {
 }
 
 // ── FILTERS ───────────────────────────────────────
-// FIX: setPriFilter clears recent flag and resets action/source to keep stats in sync
-function setPriFilter(val, el) {
-  F.recent = false;
-  resetFilterChipsUI();
-  if (el) el.classList.add('active');
-  else { const map={urgent:'fUrgent',high:'fHigh',medium:'fMedium',all:'fAll'}; document.getElementById(map[val])?.classList.add('active'); }
-  F.priority = val === 'all' ? null : val;
-  renderItems();
-}
-
-// FIX: setSrcFilter clears recent flag
-function setSrcFilter(val, el) {
-  F.recent = false;
-  document.getElementById('fRecent').style.display = 'none';
-  document.getElementById('sc-recent')?.classList.remove('stat-active');
-  el.classList.toggle('active');
-  F.source = el.classList.contains('active') ? val : null;
-  ['fEmail','fTelegram'].forEach(id => { if (document.getElementById(id) !== el) document.getElementById(id)?.classList.remove('active'); });
-  if (!el.classList.contains('active')) F.source = null;
-  renderItems();
-}
-
-// FIX: setActFilter clears recent flag
-function setActFilter(el) {
-  F.recent = false;
-  document.getElementById('fRecent').style.display = 'none';
-  document.getElementById('sc-recent')?.classList.remove('stat-active');
-  const btn = el || document.getElementById('fAction');
-  btn.classList.toggle('active'); F.action = btn.classList.contains('active'); renderItems();
-}
+// (tijdlijnfilters staan bij ITEMS)
 
 function onSearch() { F.search = document.getElementById('searchInput').value; renderItems(); }
 
@@ -1602,9 +1633,9 @@ function switchTab(name, el) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
   if (el) el.classList.add('active');
-  const titles = { items:'Priority Feed', tasks:'Tasks', agenda:'Agenda', contacts:'Contacts', projects:'Projects', review:'Review', ask:'Ask' };
+  const titles = { items:'Tijdlijn', tasks:'Tasks', agenda:'Agenda', contacts:'Contacts', projects:'Projects', review:'Review', ask:'Ask' };
   document.getElementById('pageTitle').innerHTML = titles[name] + ' <span class="topbar-sub" id="pageSub"></span>';
-  const subs = { items: allItems.length+' total', tasks: allTasks.length+' taken', agenda: allEvents.filter(e=>!e.is_cancelled).length+' afspraken', contacts: allContacts.length+' contacten', projects: allProjects.length+' actief', review: allReviews.length+' voorstellen', ask:'' };
+  const subs = { items: allItems.length+' in venster', tasks: allTasks.length+' taken', agenda: allEvents.filter(e=>!e.is_cancelled).length+' afspraken', contacts: allContacts.length+' contacten', projects: allProjects.length+' actief', review: allReviews.length+' voorstellen', ask:'' };
   document.getElementById('pageSub').textContent = subs[name] || '';
   const searchInput = document.getElementById('searchInput');
   const searchLabels = { items:'Search items...', tasks:'Search tasks...', agenda:'', contacts:'Search contacts...', projects:'Search projects...', review:'', ask:'' };
