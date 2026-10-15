@@ -148,7 +148,13 @@ body::before { content:''; position:fixed; inset:0; background:radial-gradient(e
 .action-btn.done:hover { border-color:rgba(61,214,140,0.3); color:var(--accent-green); }
 .action-btn.del:hover { border-color:rgba(255,77,77,0.3); color:var(--accent-red); }
 
+/* Topbar: verversknop blijft altijd zichtbaar, ook bij een smal venster (15/10/2026) */
+.topbar-title { min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.topbar .search-bar { flex:0 1 280px; min-width:0; }
+.topbar .btn-icon { flex:0 0 38px; }
 /* TIJDLIJN (15/10/2026) */
+.closed-head { display:flex; align-items:baseline; gap:10px; margin:34px 0 4px; padding-top:18px; border-top:1px solid var(--border); font-family:'Syne',sans-serif; font-size:15px; font-weight:700; color:var(--muted); }
+.closed-head .day-n { font-family:'DM Sans',sans-serif; font-size:12px; font-weight:500; color:var(--subtle); }
 .stat-card.s-closed { --accent-color:var(--accent-green); }
 .s-closed .stat-icon { color:var(--accent-green); }
 .day-head { display:flex; align-items:baseline; gap:10px; margin:22px 0 8px; font-family:'Syne',sans-serif; font-size:14px; font-weight:700; color:var(--text); }
@@ -826,14 +832,28 @@ function renderItems() {
     document.getElementById('itemsList').innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><div>Geen items in deze selectie</div></div>';
     return;
   }
-  // groeperen per dag
+  // Open items eerst (per dag), afgeronde en gesnoozede items onderaan in een eigen blok (per dag)
+  const rows = items.map((item, idx) => ({ item, idx }));
+  const openRows   = rows.filter(r => !(isClosed(r.item) || isSnoozed(r.item)));
+  const closedRows = rows.filter(r =>  (isClosed(r.item) || isSnoozed(r.item)));
+  let html = '';
+  if (openRows.length) html += renderDayGroups(openRows);
+  else html += '<div class="empty-state" style="padding:24px 0"><div>Geen open items in deze selectie</div></div>';
+  if (closedRows.length) {
+    html += `<div class="closed-head">Afgerond <span class="day-n">${closedRows.length}</span></div>`;
+    html += renderDayGroups(closedRows);
+  }
+  document.getElementById('itemsList').innerHTML = html;
+}
+
+function renderDayGroups(rows) {
   const groups = [];
-  items.forEach((item, idx) => {
-    const d = itemTime(item) || new Date(0);
+  rows.forEach(r => {
+    const d = itemTime(r.item) || new Date(0);
     const key = d.toDateString();
     let g = groups[groups.length-1];
     if (!g || g.key !== key) { g = { key, label: dayLabel(d), rows: [] }; groups.push(g); }
-    g.rows.push({ item, idx });
+    g.rows.push(r);
   });
   let html = '';
   groups.forEach(g => {
@@ -863,7 +883,7 @@ function renderItems() {
       </div>`;
     });
   });
-  document.getElementById('itemsList').innerHTML = html;
+  return html;
 }
 
 // ── TIJDLIJN FILTERS ─────────────────────────────
