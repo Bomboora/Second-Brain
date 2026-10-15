@@ -152,6 +152,32 @@ body::before { content:''; position:fixed; inset:0; background:radial-gradient(e
 .topbar-title { min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .topbar .search-bar { flex:0 1 280px; min-width:0; }
 .topbar .btn-icon { flex:0 0 38px; }
+/* Taakmarkering altijd zichtbaar links op de kaart (15/10/2026) */
+.tl-task { flex:0 0 auto; font-size:11px; font-weight:600; padding:1px 8px; border-radius:20px; line-height:1.6; white-space:nowrap; font-family:'DM Sans',sans-serif; }
+.tl-task.is-task { background:rgba(167,139,250,0.14); color:var(--accent-purple); border:1px solid rgba(167,139,250,0.3); }
+.tl-task.add-task { background:transparent; color:var(--subtle); border:1px dashed var(--border-active); cursor:pointer; }
+.tl-task.add-task:hover { color:var(--accent-purple); border-color:rgba(167,139,250,0.5); }
+.tl-top { align-items:center; }
+
+/* Smal venster: zijbalk wordt een icoonbalk, zodat niets rechts buiten beeld valt (15/10/2026) */
+@media (max-width: 1000px) {
+  .sidebar { width:60px; padding:18px 0; }
+  .logo { font-size:0; padding:0 0 20px; justify-content:center; }
+  .nav-section, .sidebar-footer { display:none; }
+  .nav-item { font-size:0; justify-content:center; padding:12px 0; position:relative; }
+  .nav-item .nav-icon { font-size:18px; width:auto; }
+  .nav-item .nav-badge { position:absolute; top:4px; right:6px; font-size:9px; padding:0 4px; margin:0; }
+  .main { margin-left:60px; min-width:0; }
+  .topbar { padding:14px 16px; gap:10px; }
+  .ctx-filter-bar { padding:8px 16px; top:67px; }
+  .content { padding:18px 16px; }
+  .stats-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+  .stat-number { font-size:28px; }
+}
+@media (max-width: 560px) {
+  .topbar .search-bar { display:none; }
+  .tl-side { max-width:40%; }
+}
 /* TIJDLIJN (15/10/2026) */
 .closed-head { display:flex; align-items:baseline; gap:10px; margin:34px 0 4px; padding-top:18px; border-top:1px solid var(--border); font-family:'Syne',sans-serif; font-size:15px; font-weight:700; color:var(--muted); }
 .closed-head .day-n { font-family:'DM Sans',sans-serif; font-size:12px; font-weight:500; color:var(--subtle); }
@@ -457,7 +483,7 @@ const CONFIG = {
         <div class="insight-title">Wat kwam er binnen</div>
         <div class="stats-grid">
           <div class="stat-card s-recent" id="sc-today" onclick="setStatFilter('today')">
-            <div class="stat-label">Nieuw vandaag</div>
+            <div class="stat-label">Binnengekomen vandaag</div>
             <div class="stat-row"><div class="stat-number" id="sToday">—</div><div class="stat-icon">◷</div></div>
           </div>
           <div class="stat-card s-actions" id="sc-tasks" onclick="setStatFilter('tasks')">
@@ -709,6 +735,10 @@ function setCtxFilter(ctx, el) {
   el.classList.add('active');
   // FIX: update stats when context changes
   updateStats();
+  // 15/10/2026: zijbalk-badges volgen de gekozen context
+  if (typeof updateTasksBadge === 'function') updateTasksBadge();
+  if (typeof updateAgendaBadge === 'function') updateAgendaBadge();
+  if (typeof updateReviewBadge === 'function') updateReviewBadge();
   renderCurrentTab();
 }
 
@@ -866,20 +896,19 @@ function renderDayGroups(rows) {
       const time = d ? d.toLocaleTimeString('nl-BE', { hour:'2-digit', minute:'2-digit' }) : '';
       const from = kind === 'verzonden' ? 'Verzonden' : (item.sender_name || (kind === 'telegram' ? 'Telegram' : kind === 'document' ? 'Document' : ''));
       const ctxColor = CTX_COLORS[(item.context||'algemeen').toLowerCase()] || '#5a6478';
-      const status = closed ? closedLabel(item) : (task ? '<span class="badge b-action" title="Staat in de takenlijst">☑ taak</span>' : '');
+      const status = closed ? closedLabel(item) : '';
+      const taskMark = closed ? '' : (task
+        ? '<span class="tl-task is-task" title="Staat in de takenlijst">☑ taak</span>'
+        : `<button class="tl-task add-task" onclick="event.stopPropagation();toTask('${item.id}')" title="Zet dit item in de takenlijst">＋ taak</button>`);
       const due = (!closed && task && item.due_date) ? `<span class="badge ${item.due_date < todayStr() ? 'b-urgent' : 'b-normal'}">⏱ ${fmtDate(item.due_date)}</span>` : '';
-      const btns = closed ? '' : `<div class="tl-btns" onclick="event.stopPropagation()">
-          ${task ? '' : `<button class="action-btn" onclick="toTask('${item.id}')" title="Zet dit item in de takenlijst">→ Taak</button>`}
-          <button class="action-btn del" onclick="delItem('${item.id}')" title="Verwijderen (ruis)">✕</button>
-        </div>`;
       html += `<div class="tl-card${closed ? ' is-closed' : ''}" style="--ctx:${ctxColor}" onclick="openItemModal(${idx})">
         <div class="tl-icon" title="${kind}">${KIND_ICON[kind] || '✉'}</div>
         <div class="tl-main">
-          <div class="tl-top"><span class="tl-from">${esc(from)}</span><span class="tl-time">${time}</span></div>
+          <div class="tl-top">${taskMark}<span class="tl-from">${esc(from)}</span><span class="tl-time">${time}</span></div>
           <div class="tl-title">${esc(item.title) || '(geen titel)'}</div>
           ${item.summary ? `<div class="tl-sum">${esc(item.summary)}</div>` : ''}
         </div>
-        <div class="tl-side">${status}${due}${btns}</div>
+        <div class="tl-side">${status}${due}</div>
       </div>`;
     });
   });
@@ -908,9 +937,9 @@ function toggleHideDone() {
   try { localStorage.setItem('sb_hide_done', F.hideDone ? '1' : '0'); } catch(e) {}
   renderItems();
 }
-const STAT_LABELS = { today:'Nieuw vandaag', tasks:'Open taken', overdue:'Vervallen deadlines', closed:'Automatisch afgesloten (24u)' };
+const STAT_LABELS = { today:'Binnengekomen vandaag', tasks:'Open taken', overdue:'Vervallen deadlines', closed:'Automatisch afgesloten (24u)' };
 function setStatFilter(type) {
-  if (type === 'tasks') { switchTab('tasks', document.querySelector(`.nav-item[onclick*="'tasks'"]`)); return; }
+  if (type === 'tasks') { gotoTasks(); return; }
   if (F.stat === type) { clearStatFilter(); return; }
   F.stat = type;
   ['today','tasks','overdue','closed'].forEach(x => document.getElementById('sc-'+x)?.classList.toggle('stat-active', x === type));
@@ -941,15 +970,15 @@ function openItemModal(idx) {
     <div class="modal-field"><div class="modal-field-label">Takenlijst</div><div class="modal-field-value">${closed ? (isSnoozed(item) ? '⏸ Gesnoozed' : '✓ Afgerond' + (item.resolved_at ? ' (automatisch afgesloten)' : item.cleanup ? ' (opkuis)' : '')) : (task ? '☑ Staat in de takenlijst' : 'Staat niet in de takenlijst')}</div></div>
     <div class="modal-field"><div class="modal-field-label">Context / Bron / Categorie</div><div class="modal-field-value">${CTX_LABELS[item.context]||item.context||'—'} · ${esc(item.source||'—')} · ${esc(item.category||'—')}</div></div>
   `;
-  document.getElementById('modalActions').innerHTML = closed ? `
+  // Tijdlijn is alleen-lezen: afvinken gebeurt in Taken. Hier kan je enkel een item in de takenlijst zetten.
+  document.getElementById('modalActions').innerHTML = `
+    ${(!closed && !task) ? `<button class="btn-primary" onclick="toTask('${item.id}');closeModal()">＋ In takenlijst</button>` : ''}
+    ${(!closed && task) ? `<button class="btn-primary" onclick="closeModal();gotoTasks()">Naar Taken</button>` : ''}
     <button class="btn-secondary" onclick="closeModal()">Sluiten</button>
-  ` : `
-    ${task ? `<button class="btn-primary" onclick="markDone('${item.id}');closeModal()">✓ Afgerond</button>`
-           : `<button class="btn-primary" onclick="toTask('${item.id}');closeModal()">→ Taak</button>`}
-    <button class="btn-danger" onclick="delItem('${item.id}');closeModal()">Verwijderen</button>
   `;
   document.getElementById('modalOverlay').classList.add('open');
 }
+function gotoTasks() { switchTab('tasks', document.querySelector(`.nav-item[onclick*="'tasks'"]`)); }
 function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
 
 // ── ITEM ACTIONS ─────────────────────────────────
@@ -1016,22 +1045,23 @@ async function loadTasks() {
   }
 }
 function updateTasksBadge() {
-  const n = allTasks.length;
+  const n = allTasks.filter(matchCtx).length;
   document.getElementById('tasksBadge').textContent = n > 0 ? n : '—';
   if (typeof updateStats === 'function' && document.getElementById('sTasks')) updateStats();
 }
-function todayStr() { return new Date().toISOString().split('T')[0]; }
+function localIso(d) { return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+function todayStr() { return localIso(new Date()); }
 function endOfWeekStr() {
   const d = new Date(); const day = d.getDay();
   const diff = day === 0 ? 6 : 7 - day;
   d.setDate(d.getDate() + diff);
-  return d.toISOString().split('T')[0];
+  return localIso(d);
 }
 function formatTaskDate(due) {
   if (!due) return { label:'+ datum', cls:'is-none' };
   const today = todayStr();
   const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
-  const tomorrowStr = tomorrow.toISOString().split('T')[0];
+  const tomorrowStr = localIso(tomorrow);
   if (due < today) return { label: fmtDate(due), cls:'is-overdue' };
   if (due === today) return { label:'Vandaag', cls:'is-today' };
   if (due === tomorrowStr) return { label:'Morgen', cls:'is-tomorrow' };
@@ -1193,7 +1223,7 @@ async function loadEvents() {
 
 function updateAgendaBadge() {
   const now = new Date().toISOString();
-  const upcoming = allEvents.filter(e => !e.is_cancelled && e.start_time >= now).length;
+  const upcoming = allEvents.filter(e => !e.is_cancelled && e.start_time >= now && (!G_CTX || (e.context||'').toLowerCase() === G_CTX)).length;
   document.getElementById('agendaBadge').textContent = upcoming > 0 ? upcoming : '—';
 }
 
@@ -1219,7 +1249,7 @@ function renderEvents() {
   const groups = {};
   const today = todayStr();
   const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
-  const tomorrowStr = tomorrow.toISOString().split('T')[0];
+  const tomorrowStr = localIso(tomorrow);
 
   events.forEach(e => {
     const dayKey = e.start_time ? e.start_time.split('T')[0] : 'unknown';
@@ -1510,7 +1540,7 @@ async function loadReviews() {
   }
 }
 function updateReviewBadge() {
-  document.getElementById('reviewBadge').textContent = allReviews.length;
+  document.getElementById('reviewBadge').textContent = allReviews.filter(r => !G_CTX || ((r.open_item && r.open_item.context) || 'algemeen').toLowerCase() === G_CTX).length;
 }
 function fmtShort(iso) {
   if (!iso) return '';
